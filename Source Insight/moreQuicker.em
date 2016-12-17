@@ -28,11 +28,23 @@ macro ExpandPorc(Lang)
 	strCMD = GetCurLnCMD(szline)
 	szlineWhite = GetIchBackSpace(szline)
 	szlineWhiteWhitTab = "@szlineWhite@" # "    "
+
+
 	if("{" == strCMD)
 	{
 		InsBufLine(hbuf,curLnNum+1,"@szlineWhiteWhitTab@")
 		InsBufLine(hbuf,curLnNum+2,"@szlineWhite@" # "}")
 		SetBufIns (hbuf,curLnNum+1,strlen(szlineWhiteWhitTab))
+	}
+
+
+
+
+
+
+	else if("config" == strCMD || "conf" == strCMD)
+	{
+		configSystem()
 	}
 	
 }
@@ -44,7 +56,8 @@ macro GetIchBackSpace(szline) /*获取当前行，前面的一片空白*/
 		stop
 	ichFirst = 0
 	chTab = CharFromAscii(9)
-	while(" " == szline[ichFirst] || chTab == szline[ichFirst])
+	chSpace = CharFromAscii(32) /*space*/
+	while(chSpace == szline[ichFirst] || chTab == szline[ichFirst])
 	{
 		ichFirst = ichFirst + 1
 	}
@@ -59,11 +72,12 @@ macro GetCurLnCMD(szline)  /*获取当前行的命令字*/
 	ichFirst = 0
 	chTab = CharFromAscii(9) /*tab*/
 	chSpace = CharFromAscii(32) /*space*/
-	while(" " == szline[ichFirst] || chTab == szline[ichFirst])
+	chEnter = CharFromAscii(13) /*enter*/
+	while(chEnter == szline[ichFirst] || chTab == szline[ichFirst] || chSpace == szline[ichFirst])
 	{
 		ichFirst = ichFirst + 1
 	}
-	while(" " == szline[ichLast] || chTab == szline[ichLast] || chSpace == szline[ichLast])
+	while(chEnter == szline[ichLast] || chTab == szline[ichLast] || chSpace == szline[ichLast])
 	{
 		ichLast = ichLast -1
 	}
@@ -99,7 +113,7 @@ macro GSEnvLanguage(setflag)
 	strLang = getreg(ENVLang)
 	if(0 == strLang || 1 == setflag)
 	{
-		while("0" != strLang || "1" != strLang)
+		while("0" != strLang && "1" != strLang)
 		{
 			strLang = ask("Please select language: 0 Chinese, 1 English");
 		}
