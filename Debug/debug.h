@@ -3,7 +3,4 @@
 
 #define print(val)
 	printf("%s = %ul",(#val),val)
-
-
-
 #endif
