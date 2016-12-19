@@ -3,20 +3,20 @@ macro AutoExpand()
 	hwnd = GetCurrentWnd()
 	if(0 == hwnd)
 		stop
-	sel = GetWndSel(hwnd)/*»ñÈ¡µ±Ç°±»Ñ¡ÖĞ¿é »òÕßµ±Ç°ĞĞ*/
+	sel = GetWndSel(hwnd)/*è·å–å½“å‰è¢«é€‰ä¸­å— æˆ–è€…å½“å‰è¡Œ*/
 	GSAutherName(0)
 	GSAutherEMail(0)
 	strLang = GSEnvLanguage(0)
-	if(sel.lnfirst != sel.lnLast)/*¶àĞĞ¿é*/
+	if(sel.lnfirst != sel.lnLast)/*å¤šè¡Œå—*/
 	{
-		//CommandProc()/*ÃüÁî´¦Àí*/
+		//CommandProc()/*å‘½ä»¤å¤„ç†*/
 	}
-	if(0 == sel.ichFirst)/*µ±Ç°ĞĞÃ»ÓĞ×Ö·û»òÕßÄÚÈİ*/
+	if(0 == sel.ichFirst)/*å½“å‰è¡Œæ²¡æœ‰å­—ç¬¦æˆ–è€…å†…å®¹*/
 	{
 		stop
 	}
 	
-	/*µ±Ç°ĞĞÓĞ×Ö·ûÃüÁî£¬ÈÃExpandProx½øĞĞ½âÎöºÍÌî³ä*/
+	/*å½“å‰è¡Œæœ‰å­—ç¬¦å‘½ä»¤ï¼Œè®©ExpandProxè¿›è¡Œè§£æå’Œå¡«å……*/
 	ExpandPorc(strLang)
 }
 
@@ -49,22 +49,29 @@ macro ExpandPorc(Lang)
 	
 }
 
-macro GetIchBackSpace(szline) /*»ñÈ¡µ±Ç°ĞĞ£¬Ç°ÃæµÄÒ»Æ¬¿Õ°×*/
+macro GetBlankSpace(szline,Blank)
 {
-	ichLast = strlen(szline)
-	if(0 == ichLast)
-		stop
-	ichFirst = 0
-	chTab = CharFromAscii(9)
-	chSpace = CharFromAscii(32) /*space*/
-	while(chSpace == szline[ichFirst] || chTab == szline[ichFirst])
-	{
-		ichFirst = ichFirst + 1
-	}
-	return strmid(szline,0,ichFirst)
+    ichFrist = 0
+    ichLast = strlen(szline)
+    if(0 == ichLast)
+    {
+    	return ""
+    }
+    chBlack = CharFromAscii(32)
+    chEnter = CharFromAscii(13)
+    chTab = CharFromAscii(9)
+    while(chBlack == szline[ichFrist] || chEnter == szline[ichFrist] || chTab == szline[ichFrist])
+    {
+    	ichFrist = ichFrist + 1 
+    }
+    if(0 == Blank)
+    {
+    	return strmid(szline,0,ichFrist)
+    }
+    return strmid(szline,ichFrist,ichLast)
 }
 
-macro GetCurLnCMD(szline)  /*»ñÈ¡µ±Ç°ĞĞµÄÃüÁî×Ö*/
+macro GetCurLnCMD(szline)  /*è·å–å½“å‰è¡Œçš„å‘½ä»¤å­—*/
 {
 	ichLast = strlen(szline)
 	if(0 == ichLast)
@@ -85,7 +92,7 @@ macro GetCurLnCMD(szline)  /*»ñÈ¡µ±Ç°ĞĞµÄÃüÁî×Ö*/
 }
 
 
-/*»ñµÃ×÷ÕßµÄĞÕÃû,Èç¹ûÎª¿ÕÔòÉèÖÃ*/
+/*è·å¾—ä½œè€…çš„å§“å,å¦‚æœä¸ºç©ºåˆ™è®¾ç½®*/
 macro GSAutherName(setFlag)
 {
 	strName = getreg(AuthorName)
@@ -97,7 +104,7 @@ macro GSAutherName(setFlag)
 	return strName
 }
 
-macro GSAutherEMail(setFlag)/*setFlag Îª1Ê±£¬ÖØĞ´*/
+macro GSAutherEMail(setFlag)/*setFlag ä¸º1æ—¶ï¼Œé‡å†™*/
 {
 	strEMail = getreg(AutherEMail)
 	if(0 == strlen(strEMail) || 1==setFlag)
@@ -122,7 +129,7 @@ macro GSEnvLanguage(setflag)
 	return strLang
 }
 
-macro configSystem()  /*ÖØĞÂÉèÖÃ»·¾³*/
+macro configSystem()  /*é‡æ–°è®¾ç½®ç¯å¢ƒ*/
 {
 	GSAutherName(1)
 	GSAutherEMail(1)
@@ -130,7 +137,7 @@ macro configSystem()  /*ÖØĞÂÉèÖÃ»·¾³*/
 }
 
 
-macro delCurLine()¡¡/*É¾³ıµ±Ç°ĞĞmacro*/
+macro delCurLine()ã€€/*åˆ é™¤å½“å‰è¡Œmacro*/
 {
 	hbuf = GetCurrentBuf()
 	curLnNum = GetBufLnCur(hbuf)
@@ -138,3 +145,42 @@ macro delCurLine()¡¡/*É¾³ıµ±Ç°ĞĞmacro*/
 }
 
 
+
+
+macro AddLineComment(hbuf,line,PreFlag,LastFlag)
+{
+	str = GetBufLine(hbuf,line);
+	if(0 != Preflag)
+	{
+		BlackSpace = GetBlankSpace(str,0)
+		BlackSpace = cat(BlackSpace, "/*") 
+		str = GetBlankSpace(str,1)
+		str = cat(BlackSpace,str)
+	}
+	if(0 != LastFlag)
+	{
+		str = cat(str,"*/") 
+	}
+	DelBufLine(hbuf, line)
+        InsBufLine(hbuf, line, str)
+}
+
+macro AddMultiComment()
+{   
+    hbuf = GetCurrentBuf();
+    hwnd = GetCurrentWnd();
+    sel = GetWndSel(hwnd);
+
+    if (sel.fExtended == FALSE)
+    {
+    	curLn = GetBufLnCur(hbuf)
+    	AddLineComment(hbuf,curLn,1,1)
+    	stop
+    }
+
+    lnFirst = sel.lnFirst;
+    lnLast = sel.lnLast;
+    AddLineComment(hbuf,lnFirst,1,0)
+    AddLineComment(hbuf,lnLast,0,1)
+    SetWndSel(hwnd, sel);
+}
