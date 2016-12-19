@@ -26,7 +26,7 @@ macro ExpandPorc(Lang)
 	curLnNum = GetBufLnCur(hbuf)
 	szline = GetBufLine(hbuf,curLnNum)
 	strCMD = GetCurLnCMD(szline)
-	szlineWhite = GetIchBackSpace(szline)
+	szlineWhite = GetBlankSpace(szline,0)
 	szlineWhiteWhitTab = "@szlineWhite@" # "    "
 
 
