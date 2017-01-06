@@ -184,3 +184,44 @@ macro AddMultiComment()
     AddLineComment(hbuf,lnLast,0,1)
     SetWndSel(hwnd, sel);
 }
+
+macro DelMultiCommet()
+{
+	hbuf = getCurrentBuf()
+	hwnd = getCurrentWnd()
+	sel = GetWndSel(hwnd)
+	line = getBuflnCur(hbuf)
+	if(false == sel.fExtended)
+	{
+		DelLineComment(hbuf,line)
+	}
+	DelLineComment(hbuf,sel.lnFirst)
+	DelLineComment(hbuf,sel.lnLast)
+}
+
+
+macro DelLineComment(hbuf,line)
+{
+	szline = GetBufLine(hbuf,line)
+	strButBlank = GetBlankSpace(szline,1)
+	strBlank = GetBlankSpace(szline,0)
+	lnlen = strlen(strButBlank)
+	if("" != strButBlank &&  lnlen>= 2)
+	{
+		if("/" == strButBlank[0] && "*" == strButBlank[1])
+		{
+			strDeletedComment = strmid(strButBlank,2,strlen(strButBlank))
+			strDeletedComment = cat(strBlank,strDeletedComment)
+			DelBufLine(hbuf,line)
+			InsBufLine(hbuf,line,strDeletedComment)
+			
+		}
+		lnlen = strlen(strButBlank)
+		if(lnlen >=2 && "*" == strButBlank[lnlen-2] && "/" == strButBlank[lnlen-1])
+		{
+			strDeletedComment = strmid(strButBlank,0,strlen(strButBlank)-2)
+			DelBufLine(hbuf,line)
+			InsBufLine(hbuf,line,strDeletedComment)
+		}
+	}
+}
