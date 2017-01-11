@@ -14,20 +14,19 @@ macro AutoExpand()
 	hwnd = GetCurrentWnd()
 	if(0 == hwnd)
 		stop
-	sel = GetWndSel(hwnd)/*获取当前被选中块 或者当前行*/
+	sel = GetWndSel(hwnd)
 	GSAutherName(0)
 	GSAutherEMail(0)
 	strLang = GSEnvLanguage(0)
-	if(sel.lnfirst != sel.lnLast)/*多行块*/
+	if(sel.lnfirst != sel.lnLast)
 	{
-		//CommandProc()/*命令处理*/
+		//CommandProc()
 	}
-	if(0 == sel.ichFirst)/*当前行没有字符或者内容*/
+	if(0 == sel.ichFirst)
 	{
 		stop
 	}
 	
-	/*当前行有字符命令，让ExpandProx进行解析和填充*/
 	ExpandPorc(strLang)
 }
 
@@ -137,7 +136,7 @@ macro GetBlankSpace(szline,Blank)
 * @par  revise
 * @li   123, 2017/1/11, create new function
 */
-macro GetCurLncmd(szline)  /*获取当前行的命令字*/
+macro GetCurLncmd(szline)
 {
 	cmd = strTrim(szline)
 	return cmd;
@@ -182,7 +181,7 @@ macro GSAutherName(setFlag)
 * @par  revise
 * @li   123, 2017/1/11, create new function
 */
-macro GSAutherEMail(setFlag)/*setFlag 为1时，重写*/
+macro GSAutherEMail(setFlag)
 {
 	strEMail = getreg(AutherEMail)
 	if(0 == strlen(strEMail) || 1==setFlag)
@@ -234,7 +233,7 @@ macro GSEnvLanguage(setflag)
 * @par  revise
 * @li   123, 2017/1/11, create new function
 */
-macro configSystem()  /*重新设置环境*/
+macro configSystem()
 {
 	GSAutherName(1)
 	GSAutherEMail(1)
@@ -254,7 +253,7 @@ macro configSystem()  /*重新设置环境*/
 * @par  revise
 * @li   123, 2017/1/11, create new function
 */
-macro delCurLine()　/*删除当前行macro*/
+macro delCurLine()
 {
 	hbuf = GetCurrentBuf()
 	curLnNum = GetBufLnCur(hbuf)
@@ -847,7 +846,7 @@ macro DFuncComment(hbuf,line,booldef)
 			SearchForward("#")
 
 			frist_time = 1
-			curBufLn   = GetBufLnCur(hbuf)/**<函数定义行或者声明行*/
+			curBufLn   = GetBufLnCur(hbuf)
 			while(true)
 			{
 				
