@@ -959,7 +959,7 @@ macro defComment(hbuf,line,func)
 	if(("#ifdef" != func) && ("#ifndef" != func) && ("#if" != func))
 	{
 		return
-	}
+	}
 	cmdszLine = GetBufLine(hbuf,line)
 	LeftBlanck = GetBlankSpace(cmdszline,0)
 	DelbufLine(hbuf,line)
@@ -981,19 +981,3 @@ macro defComment(hbuf,line,func)
 	InsBufline(hbuf,line+2,"@LeftBlanck@#endif /*@key@*/")
 	SetBufIns(hbuf,line+1,strLen(LeftBlanck))
 }
-
-
-/**
-* @brief
-*    make up ifndef code block automaticly
-*
-* @author  sharwen
-* 
-* @param[in]   hbuf  a handle
-* @param[in]   line  function define line number
-*
-* @return
-*    	
-* @par  revise
-* @li   Sharwen, 2017/1/11, create new function
-*/
