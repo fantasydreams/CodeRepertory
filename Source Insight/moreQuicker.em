@@ -62,16 +62,37 @@ macro ExpandPorc(Lang)
 	}
 	if("dfunc" == commond || "df" == commond)
 	{
+		DelBufline(hbuf,curLnNum)      /**<delete current line*/
 		DFuncComment(hbuf,curLnNum,0)
 		return
 	}
 	if("dfuncdef" == commond || "dfd" == commond)
 	{
+		DelBufline(hbuf,curLnNum)      /**<delete current line*/
 		DFuncComment(hbuf,curLnNum,1)
 		return
 	}
-
-
+	if("hd" == commond || "head" == command)
+	{
+		DelBufline(hbuf,curLnNum)      /**<delete current line*/
+		HeadComment(hbuf)
+		return
+	}
+	if("#ifdef" == commond || "#ifd" == commond)/**< #ifdef code block*/
+	{
+		defComment(hbuf,curLnNum,"#ifdef")
+		return
+	}
+	if("#ifndef" == commond || "#ifnd" == commond)/**< #ifndef code block*/
+	{
+		defComment(hbuf,curLnNum,"#ifndef")
+		return
+	}
+	if("#if" == commond)/**< #if code block*/
+	{
+		defComment(hbuf,curLnNum,"#if")
+		return
+	}
 
 
 	else if("config" == commond || "conf" == commond)
@@ -134,11 +155,13 @@ macro GetBlankSpace(szline,Blank)
 * @return
 *    
 * @par  revise
-* @li   123, 2017/1/11, create new function
+* @li   sharwen, 2017/1/11, create new function
+* @li   sharwen, 2017/1/13, support command line add new words except for command
 */
 macro GetCurLncmd(szline)
 {
 	cmd = strTrim(szline)
+	cmd = GetFristWord(cmd)
 	return cmd;
 }
 
@@ -551,7 +574,7 @@ macro GetLineWithoutComment(szline)
 * @par  revise
 * @li   123, 2017/1/11, create new function
 */
-macro GetLastKey(szline)
+macro GetLastWord(szline)
 {
 	ichLast  = strlen(szline)
 	ichFrist = ichLast - 1
@@ -574,6 +597,43 @@ macro GetLastKey(szline)
 	return strmid(szline,ichFrist+1,ichLast)
 }
 
+
+/**
+* @brief
+*    get frist word from a string
+*
+* @author  sharwen
+* 
+* @param   szline   a string
+*
+* @return
+*    	string
+* @par  revise
+* @li   123, 2017/1/13, create new function
+*/
+macro GetFristWord(szline)
+{
+	ichLast  = 0
+	ichFrist = 0
+	szLen    = strlen(szline)
+	if(0 == szLen)
+	{
+		return ""
+	}
+	chBlack = CharFromAscii(32)
+    chTab   = CharFromAscii(9)
+    
+	while(ichLast < szLen)
+	{
+		if(chBlack == szline[ichLast] || chTab == szline[ichLast])
+		{
+			break;
+		}
+		ichLast = ichLast + 1
+	}
+
+	return strmid(szline,ichFrist,ichLast)
+}
 
 /**
 * @brief
@@ -772,7 +832,6 @@ macro DFuncComment(hbuf,line,booldef)
 	{
 		return
 	}
-	DelBufline(hbuf,line)      /**<delete current line*/
 	symbol = GetCurSymbol()
 	brief  = ask("please intput brief of this function:")
 	brief  = cat("*    ",brief)
@@ -805,7 +864,7 @@ macro DFuncComment(hbuf,line,booldef)
 		while(Inx < paraNum)
 		{
 			szline = GetBufLine(FuncListBuf,Inx)
-			key    = GetLastKey(szline)
+			key    = GetLastWord(szline)
 			InsBufLine(hbuf,newline + Inx,"* \@param   @key@")
 			Inx = Inx + 1
 		}
@@ -877,4 +936,48 @@ macro DFuncComment(hbuf,line,booldef)
 		}
 	}
 	
+}
+
+
+/**
+* @brief
+*    make up ifdef or ifndef code block automaticly
+*
+* @author  sharwen
+* 
+* @param[in]   hbuf  a handle
+* @param[in]   line  function define line number
+* @param[in]   func  func name , #ifdef or #ifndef
+*
+* @return
+*    	
+* @par  revise
+* @li   Sharwen, 2017/1/11, create new function
+*/
+macro defComment(hbuf,line,func)
+{
+	if(("#ifdef" != func) && ("#ifndef" != func) && ("#if" != func))
+	{
+		return
+	}
+	cmdszLine = GetBufLine(hbuf,line)
+	LeftBlanck = GetBlankSpace(cmdszline,0)
+	DelbufLine(hbuf,line)
+	cmd = GetCurLncmd(cmdszLine)
+	cmdLen    = strlen(cmd)
+	szlineLen = strlen(cmdszLine)
+	Key  = ""
+	if(cmdLen + 1 < szlineLen)/**< aleady input key*/
+	{
+		Key = strmid(cmdszline,cmdLen+1,szlineLen)
+	}
+	else
+	{
+		Key = ask("input key:")
+	}
+	InsertStr = cat(LeftBlanck,"@func@ @Key@")
+	InsBufline(hbuf,line,InsertStr)
+	InsBufline(hbuf,line+1,LeftBlanck)
+	InsBufline(hbuf,line+2,"@LeftBlanck@#endif /*@key@*/")
+	SetBufIns(hbuf,line+1,strLen(LeftBlanck))
 }
