@@ -694,13 +694,12 @@ macro SplitString(szline,hbuf,chBegin,separater,chEnd)
 		}
 		
 		if(wichFrist == wtmpInx) /**<avoid continuous separater*/
-		
-{
+		{
 			wichFrist = wichFrist + 1
 			continue
 		}
 		szword = strmid(szline,wichFrist,wtmpInx)
-		szword = strTrim(wword)
+		szword = strTrim(szword)
 
 		if("void" != szword && "VOID" != szword && nil != szword)
 		{
@@ -743,7 +742,7 @@ macro GetFuncParaList(hbuf,FuncListBuf,symbol)
 		{
 			wLInx = 0
 		}
-		if("{" == line[0] || "{" == line[wLInx] || ";" == line[0] || ";" == line[wLInx])/*function define finished*/
+		if("{" == szline[0] || "{" == szline[wLInx] || ";" == szline[0] || ";" == szline[wLInx])/*function define finished*/
 		{
 			wichLast  = strlen(szfuncDef)
 			szfuncDef = strmid(szfuncDef,0,wichLast-1)
@@ -870,7 +869,7 @@ macro DFuncComment(hbuf,wline,booldef)
 		{
 			szline = GetBufLine(hFuncListBuf,wInx)
 			szkey  = GetLastWord(szline)
-			InsBufLine(hbuf,wnewline + wInx,"* \@param   @szkey@")
+			InsBufLine(hbuf,wnewline + wInx,"* \@param[in]  @szkey@")
 			wInx = wInx + 1
 		}
 		wnewline = wnewline + wInx
@@ -933,7 +932,7 @@ macro DFuncComment(hbuf,wline,booldef)
 				szline   = cat(szline,"@sznewParam@")
 				szline   = cat(szline,szrightbracket)
 				putBufLine(hbuf,wcurBufLn,szline)
-				InsBufLine(hbuf,wInsParaListLn,"* \@param   @sznewParam@")
+				InsBufLine(hbuf,wInsParaListLn,"* \@param[in]  @sznewParam@")
 				wInsParaListLn = wInsParaListLn + 1
 				wcurBufLn = wcurBufLn + 1
 			}
