@@ -47,55 +47,59 @@ macro AutoExpand()
 macro ExpandPorc(Lang)
 {
 	hbuf = GetCurrentBuf()
-	curLnNum = GetBufLnCur(hbuf)
-	szline   = GetBufLine(hbuf,curLnNum)
-	commond  = GetCurLncmd(szline)
+	wcurLnNum = GetBufLnCur(hbuf)
+	szline    = GetBufLine(hbuf,wcurLnNum)
+	szcommand = GetCurLncmd(szline)
+	szcommand = toSmallLetter(szcommand)
 	szlineWhite = GetBlankSpace(szline,0)
 	szlineWhiteWhitTab = "@szlineWhite@" # "    "
 
-	if("{" == commond)
+	if("{" == szcommond)
 	{
-		InsBufLine(hbuf,curLnNum+1,"@szlineWhiteWhitTab@")
-		InsBufLine(hbuf,curLnNum+2,"@szlineWhite@" # "}")
-		SetBufIns (hbuf,curLnNum+1,strlen(szlineWhiteWhitTab))
+		InsBufLine(hbuf,wcurLnNum+1,"@szlineWhiteWhitTab@")
+		InsBufLine(hbuf,wcurLnNum+2,"@szlineWhite@" # "}")
+		SetBufIns (hbuf,wcurLnNum+1,strlen(szlineWhiteWhitTab))
 		return
 	}
-	if("dfunc" == commond || "df" == commond)
+	if("dfunc" == szcommand || "df" == szcommand)
 	{
-		DelBufline(hbuf,curLnNum)      /**<delete current line*/
-		DFuncComment(hbuf,curLnNum,0)
+		DelBufline(hbuf,wcurLnNum)      /**<delete current line*/
+		DFuncComment(hbuf,wcurLnNum,0)
 		return
 	}
-	if("dfuncdef" == commond || "dfd" == commond)
+	if("dfuncdef" == szcommand || "dfd" == szcommand)
 	{
-		DelBufline(hbuf,curLnNum)      /**<delete current line*/
-		DFuncComment(hbuf,curLnNum,1)
+		DelBufline(hbuf,wcurLnNum)      /**<delete current line*/
+		DFuncComment(hbuf,wcurLnNum,1)
 		return
 	}
-	if("hd" == commond || "head" == command)
+	if("hd" == szcommand || "head" == szcommand)
 	{
-		DelBufline(hbuf,curLnNum)      /**<delete current line*/
+		DelBufline(hbuf,wcurLnNum)      /**<delete current line*/
 		HeadComment(hbuf)
 		return
 	}
-	if("#ifdef" == commond || "#ifd" == commond)/**< #ifdef code block*/
+	if("#ifdef" == szcommand || "#ifd" == szcommand)/**< #ifdef code block*/
 	{
-		defComment(hbuf,curLnNum,"#ifdef")
+		defComment(hbuf,wcurLnNum,"#ifdef")
 		return
 	}
-	if("#ifndef" == commond || "#ifnd" == commond)/**< #ifndef code block*/
+	if("#ifndef" == szcommand || "#ifnd" == szcommand)/**< #ifndef code block*/
 	{
-		defComment(hbuf,curLnNum,"#ifndef")
+		defComment(hbuf,wcurLnNum,"#ifndef")
 		return
 	}
-	if("#if" == commond)/**< #if code block*/
+	if("#if" == szcommand)/**< #if code block*/
 	{
-		defComment(hbuf,curLnNum,"#if")
+		defComment(hbuf,wcurLnNum,"#if")
 		return
+	}
+	if("enum" == szcommand || "en" == szcommand)
+	{
+		ENUMComment(hbuf,wcurLnNum)
 	}
 
-
-	else if("config" == commond || "conf" == commond)
+	else if("config" == szcommand || "conf" == szcommand)
 	{
 		configSystem()
 		return
@@ -946,7 +950,7 @@ macro DFuncComment(hbuf,line,booldef)
 * @author  sharwen
 * 
 * @param[in]   hbuf  a handle
-* @param[in]   line  function define line number
+* @param[in]   wline  function define line number
 * @param[in]   func  func name , #ifdef or #ifndef
 *
 * @return
@@ -954,30 +958,144 @@ macro DFuncComment(hbuf,line,booldef)
 * @par  revise
 * @li   Sharwen, 2017/1/11, create new function
 */
-macro defComment(hbuf,line,func)
+macro defComment(hbuf,wline,func)
 {
 	if(("#ifdef" != func) && ("#ifndef" != func) && ("#if" != func))
 	{
 		return
 	}
-	cmdszLine = GetBufLine(hbuf,line)
-	LeftBlanck = GetBlankSpace(cmdszline,0)
-	DelbufLine(hbuf,line)
-	cmd = GetCurLncmd(cmdszLine)
-	cmdLen    = strlen(cmd)
-	szlineLen = strlen(cmdszLine)
-	Key  = ""
-	if(cmdLen + 1 < szlineLen)/**< aleady input key*/
+	szcmdLine = GetBufLine(hbuf,wline)
+	szLeftBlanck = GetBlankSpace(szcmdLine,0)
+	DelbufLine(hbuf,wline)
+	szcmd = GetCurLncmd(szcmdLine)
+	wcmdLen    = strlen(szcmd)
+	wszlineLen = strlen(szcmdLine)
+	szKey  = ""
+	if(wcmdLen + 1 < wszlineLen)/**< aleady input key*/
 	{
-		Key = strmid(cmdszline,cmdLen+1,szlineLen)
+		szKey = strmid(szcmdline,wcmdLen+1,wszlineLen)
 	}
 	else
 	{
-		Key = ask("input key:")
+		szKey = ask("input key:")
 	}
-	InsertStr = cat(LeftBlanck,"@func@ @Key@")
-	InsBufline(hbuf,line,InsertStr)
-	InsBufline(hbuf,line+1,LeftBlanck)
-	InsBufline(hbuf,line+2,"@LeftBlanck@#endif /*@key@*/")
-	SetBufIns(hbuf,line+1,strLen(LeftBlanck))
+	szInsertStr = cat(szLeftBlanck,"@func@ @szKey@")
+	InsBufline(hbuf,wline,szInsertStr)
+	InsBufline(hbuf,wline+1,szLeftBlanck)
+	InsBufline(hbuf,wline+2,"@szLeftBlanck@#endif /*@szKey@*/")
+	SetBufIns(hbuf,wline+1,strLen(szLeftBlanck))
 }
+
+
+
+/**
+* @brief
+*    make up enum code block automaticly
+*
+* @author  sharwen
+* 
+* @param[in]   hbuf  a handle
+* @param[in]   wline  function define line number
+*
+* @return
+*    	
+* @par  revise
+* @li   Sharwen, 2017/1/14, create new function
+*/
+macro ENUMComment(hbuf,wline)
+{
+	szcmdLine = GetBufLine(hbuf,wline)
+	szLeftBlanck = GetBlankSpace(szcmdLine,0)
+	DelbufLine(hbuf,wline)
+	szcmd = GetCurLncmd(szcmdLine)
+	wcmdLen    = strlen(szcmd)
+	wszlineLen = strlen(szcmdLine)
+	szKey  = ""
+	if(wcmdLen + 1 < wszlineLen)/**< aleady input key*/
+	{
+		szKey = strmid(szcmdline,wcmdLen+1,wszlineLen)
+	}
+	else
+	{
+		szKey = ask("input key:")
+	}
+	szInsertStr = cat(szLeftBlanck,"typedef enum @szKey@")
+	InsBufLine(hbuf,wline,szInsertStr)
+	InsBufLine(hbuf,wline+1,"@szLeftBlanck@{")
+	InsBufLine(hbuf,wline+2,"    @szLeftBlanck@")
+	InsBufLine(hbuf,wline+3,"@szLeftBlanck@}ENUM_@szKey@;/*ENUM_@szKey@*/")
+	SetBufIns(hbuf,wline+2,strlen(szLeftBlanck) + 4)
+}
+
+
+/**
+* @brief
+*    convert all letter in a string to small letter
+*
+* @author  sharwen
+* 
+* @param[in]   szline  a string need to convert
+*
+* @return
+*    	
+* @par  revise
+* @li   Sharwen, 2017/1/14, create new function
+*/
+macro toSmallLetter(szline)
+{
+	dszLen = strlen(szline)
+	if(0 >= dszLen)
+	{
+		return
+	}
+	dInx = 0
+	iAsc = 0
+	cch  = ""
+	while(dInx < dszLen)
+	{
+		iAsc = AsciiFromChar(szline[dInx])
+		if(65 <= iAsc && 90 >= iAsc)  /*if this char is a upper case,convert it to a small*/
+		{
+			szline[dInx] = CharFromAscii(iAsc + 32);
+		}
+		dInx = dInx + 1;
+	}
+	return szline
+}
+
+
+/**
+* @brief
+*    convert all letter in a string to upper letter
+*
+* @author  sharwen
+* 
+* @param[in]   szline  a string need to convert
+*
+* @return
+*    	
+* @par  revise
+* @li   Sharwen, 2017/1/14, create new function
+*/
+macro toUpperLetter(szline)
+{
+	dszLen = strlen(szline)
+	if(0 >= dszLen)
+	{
+		return
+	}
+	dInx = 0
+	iAsc = 0
+	cch  = ""
+	while(dInx < dszLen)
+	{
+		iAsc = AsciiFromChar(szline[dInx])
+		if(97 <= iAsc && 122 >= iAsc)  /*if this char is a small case,convert it to a upper*/
+		{
+			szline[dInx] = CharFromAscii(iAsc - 32);
+		}
+		dInx = dInx + 1;
+	}
+	return szline
+}
+
