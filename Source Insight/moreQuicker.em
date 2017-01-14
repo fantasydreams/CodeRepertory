@@ -7,7 +7,7 @@
 * @return
 *    
 * @par  revise
-* @li   123, 2017/1/11, create new function
+* @li   Sharwen, 2017/1/11, create new function
 */
 macro AutoExpand()
 {
@@ -42,60 +42,64 @@ macro AutoExpand()
 * @return
 *    
 * @par  revise
-* @li   123, 2017/1/11, create new function
+* @li   Sharwen, 2017/1/11, create new function
 */
 macro ExpandPorc(Lang)
 {
 	hbuf = GetCurrentBuf()
-	curLnNum = GetBufLnCur(hbuf)
-	szline   = GetBufLine(hbuf,curLnNum)
-	commond  = GetCurLncmd(szline)
+	wcurLnNum = GetBufLnCur(hbuf)
+	szline    = GetBufLine(hbuf,wcurLnNum)
+	szcommand = GetCurLncmd(szline)
+	szcommand = toSmallLetter(szcommand)
 	szlineWhite = GetBlankSpace(szline,0)
 	szlineWhiteWhitTab = "@szlineWhite@" # "    "
 
-	if("{" == commond)
+	if("{" == szcommand)
 	{
-		InsBufLine(hbuf,curLnNum+1,"@szlineWhiteWhitTab@")
-		InsBufLine(hbuf,curLnNum+2,"@szlineWhite@" # "}")
-		SetBufIns (hbuf,curLnNum+1,strlen(szlineWhiteWhitTab))
+		InsBufLine(hbuf,wcurLnNum+1,"@szlineWhiteWhitTab@")
+		InsBufLine(hbuf,wcurLnNum+2,"@szlineWhite@" # "}")
+		SetBufIns (hbuf,wcurLnNum+1,strlen(szlineWhiteWhitTab))
 		return
 	}
-	if("dfunc" == commond || "df" == commond)
+	if("dfunc" == szcommand || "df" == szcommand)
 	{
-		DelBufline(hbuf,curLnNum)      /**<delete current line*/
-		DFuncComment(hbuf,curLnNum,0)
+		DelBufline(hbuf,wcurLnNum)      /**<delete current line*/
+		DFuncComment(hbuf,wcurLnNum,0)
 		return
 	}
-	if("dfuncdef" == commond || "dfd" == commond)
+	if("dfuncdef" == szcommand || "dfd" == szcommand)
 	{
-		DelBufline(hbuf,curLnNum)      /**<delete current line*/
-		DFuncComment(hbuf,curLnNum,1)
+		DelBufline(hbuf,wcurLnNum)      /**<delete current line*/
+		DFuncComment(hbuf,wcurLnNum,1)
 		return
 	}
-	if("hd" == commond || "head" == command)
+	if("hd" == szcommand || "head" == szcommand)
 	{
-		DelBufline(hbuf,curLnNum)      /**<delete current line*/
+		DelBufline(hbuf,wcurLnNum)      /**<delete current line*/
 		HeadComment(hbuf)
 		return
 	}
-	if("#ifdef" == commond || "#ifd" == commond)/**< #ifdef code block*/
+	if("#ifdef" == szcommand || "#ifd" == szcommand)/**< #ifdef code block*/
 	{
-		defComment(hbuf,curLnNum,"#ifdef")
+		defComment(hbuf,wcurLnNum,"#ifdef")
 		return
 	}
-	if("#ifndef" == commond || "#ifnd" == commond)/**< #ifndef code block*/
+	if("#ifndef" == szcommand || "#ifnd" == szcommand)/**< #ifndef code block*/
 	{
-		defComment(hbuf,curLnNum,"#ifndef")
+		defComment(hbuf,wcurLnNum,"#ifndef")
 		return
 	}
-	if("#if" == commond)/**< #if code block*/
+	if("#if" == szcommand)/**< #if code block*/
 	{
-		defComment(hbuf,curLnNum,"#if")
+		defComment(hbuf,wcurLnNum,"#if")
 		return
+	}
+	if("enum" == szcommand || "en" == szcommand)
+	{
+		ENUMComment(hbuf,wcurLnNum)
 	}
 
-
-	else if("config" == commond || "conf" == commond)
+	else if("config" == szcommand || "conf" == szcommand)
 	{
 		configSystem()
 		return
@@ -116,7 +120,7 @@ macro ExpandPorc(Lang)
 * @return
 *    
 * @par  revise
-* @li   123, 2017/1/11, create new function
+* @li   Sharwen, 2017/1/11, create new function
 */
 macro GetBlankSpace(szline,Blank)
 {
@@ -127,7 +131,7 @@ macro GetBlankSpace(szline,Blank)
     	return ""
     }
     chBlank = CharFromAscii(32)
-    chTab = CharFromAscii(9)
+    chTab   = CharFromAscii(9)
     while(chBlank == szline[ichFrist] || chTab == szline[ichFrist])
     {
     	ichFrist = ichFrist + 1
@@ -160,9 +164,9 @@ macro GetBlankSpace(szline,Blank)
 */
 macro GetCurLncmd(szline)
 {
-	cmd = strTrim(szline)
-	cmd = GetFristWord(cmd)
-	return cmd;
+	szcmd = strTrim(szline)
+	szcmd = GetFristWord(szcmd)
+	return szcmd;
 }
 
 
@@ -177,17 +181,17 @@ macro GetCurLncmd(szline)
 * @return
 *    
 * @par  revise
-* @li   123, 2017/1/11, create new function
+* @li   Sharwen, 2017/1/11, create new function
 */
 macro GSAutherName(setFlag)
 {
-	strName = getreg(AuthorName)
-	if(0 == strlen(strName)|| 1==setFlag)
+	szName = getreg(AuthorName)
+	if(0 == strlen(szstrName)|| 1==setFlag)
 	{
-		strName = Ask("Please enter your name:")
-		setreg(AuthorName,strName);
+		szName = Ask("Please enter your name:")
+		setreg(AuthorName,szName);
 	}
-	return strName
+	return szName
 }
 
 
@@ -202,17 +206,17 @@ macro GSAutherName(setFlag)
 * @return
 *    
 * @par  revise
-* @li   123, 2017/1/11, create new function
+* @li   Sharwen, 2017/1/11, create new function
 */
 macro GSAutherEMail(setFlag)
 {
-	strEMail = getreg(AutherEMail)
-	if(0 == strlen(strEMail) || 1==setFlag)
+	szEMail = getreg(AutherEMail)
+	if(0 == strlen(szEMail) || 1==setFlag)
 	{
-		strEMail = Ask("Please enter your name:")
-		setreg(AutherEMail,strEMail);
+		strEMail = Ask("Please enter your email:")
+		setreg(AutherEMail,szEMail);
 	}
-	return strEMail
+	return szEMail
 }
 
 
@@ -228,20 +232,21 @@ macro GSAutherEMail(setFlag)
 * @return
 *    
 * @par  revise
-* @li   123, 2017/1/11, create new function
+* @li   Sharwen, 2017/1/11, create new function
 */
 macro GSEnvLanguage(setflag)
 {
-	strLang = getreg(ENVLang)
-	if(0 == strLang || 1 == setflag)
+	szLang = getreg(ENVLang)
+	if(0 == strlen(szLang) || 1 == setflag)
 	{
-		while("0" != strLang && "1" != strLang)
+		szLang = ask("Please select language: 0 Chinese, 1 English");
+		while("0" != szLang && "1" != szLang)
 		{
-			strLang = ask("Please select language: 0 Chinese, 1 English");
+			szLang = ask("Please select language: 0 Chinese, 1 English");
 		}
-		setreg(ENVLang,strLang)
+		setreg(ENVLang,szLang)
 	}
-	return strLang
+	return szLang
 }
 
 
@@ -254,7 +259,7 @@ macro GSEnvLanguage(setflag)
 * @return
 *    
 * @par  revise
-* @li   123, 2017/1/11, create new function
+* @li   Sharwen, 2017/1/11, create new function
 */
 macro configSystem()
 {
@@ -274,13 +279,13 @@ macro configSystem()
 * @return
 *    
 * @par  revise
-* @li   123, 2017/1/11, create new function
+* @li   Sharwen, 2017/1/11, create new function
 */
 macro delCurLine()
 {
-	hbuf = GetCurrentBuf()
-	curLnNum = GetBufLnCur(hbuf)
-	DelBufLine(hbuf,curLnNum)
+	hbuf   = GetCurrentBuf()
+	wLnNum = GetBufLnCur(hbuf)
+	DelBufLine(hbuf,wLnNum)
 }
 
 
@@ -291,32 +296,32 @@ macro delCurLine()
 *
 * @author  sharwen
 * 
-* @param   hbuf   handle buffer
-* @param   line   ln in handle buffer
-* @param   PreFlag   bool value,if it not equal 0, "/*" will be added in front of a line
-* @param   LastFlag  bool value,if it not equal 0, "*" and "/" will be added in front of a line together
+* @param[in]   hbuf   handle buffer
+* @param[in]   wline   ln in handle buffer
+* @param[in]   dPreFlag   bool value,if it not equal 0, "/*" will be added in front of a line
+* @param[in]   dLastFlag  bool value,if it not equal 0, "*" and "/" will be added in front of a line together
 *
 * @return
 *    
 * @par  revise
-* @li   123, 2017/1/11, create new function
+* @li   Sharwen, 2017/1/11, create new function
 */
-macro AddLineComment(hbuf,line,PreFlag,LastFlag)
+macro AddLineComment(hbuf,wline,dPreFlag,dLastFlag)
 {
-	str = GetBufLine(hbuf,line);
-	if(0 != Preflag)
+	szstr = GetBufLine(hbuf,wline);
+	if(0 != dPreFlag)
 	{
-		BlackSpace = GetBlankSpace(str,0)
-		BlackSpace = cat(BlackSpace, "/*") 
-		str = GetBlankSpace(str,1)
-		str = cat(BlackSpace,str)
+		szBlackSpace = GetBlankSpace(szstr,0)
+		szBlackSpace = cat(szBlackSpace, "/*") 
+		szstr = GetBlankSpace(szstr,1)
+		szstr = cat(szBlackSpace,szstr)
 	}
-	if(0 != LastFlag)
+	if(0 != dLastFlag)
 	{
-		str = cat(str,"*/") 
+		szstr = cat(szstr,"*/") 
 	}
-	DelBufLine(hbuf, line)
-        InsBufLine(hbuf, line, str)
+	DelBufLine(hbuf, wline)
+        InsBufLine(hbuf, wline, szstr)
 }
 
 
@@ -329,7 +334,7 @@ macro AddLineComment(hbuf,line,PreFlag,LastFlag)
 * @return
 *    
 * @par  revise
-* @li   123, 2017/1/11, create new function
+* @li   Shawen, 2017/1/11, create new function
 */
 macro AddMultiComment()
 {   
@@ -339,15 +344,15 @@ macro AddMultiComment()
 
     if (sel.fExtended == FALSE)
     {
-    	curLn = GetBufLnCur(hbuf)
-    	AddLineComment(hbuf,curLn,1,1)
+    	wcurLn = GetBufLnCur(hbuf)
+    	AddLineComment(hbuf,wcurLn,1,1)
     	stop
     }
 
-    lnFirst = sel.lnFirst;
-    lnLast = sel.lnLast;
-    AddLineComment(hbuf,lnFirst,1,0)
-    AddLineComment(hbuf,lnLast,0,1)
+    wlnFirst = sel.lnFirst;
+    wlnLast = sel.lnLast;
+    AddLineComment(hbuf,wlnFirst,1,0)
+    AddLineComment(hbuf,wlnLast,0,1)
     SetWndSel(hwnd, sel);
 }
 
@@ -361,17 +366,17 @@ macro AddMultiComment()
 * @return
 *    
 * @par  revise
-* @li   123, 2017/1/11, create new function
+* @li   Sharwen, 2017/1/11, create new function
 */
 macro DelMultiCommet()
 {
 	hbuf = getCurrentBuf()
 	hwnd = getCurrentWnd()
 	sel = GetWndSel(hwnd)
-	line = getBuflnCur(hbuf)
+	wline = getBuflnCur(hbuf)
 	if(false == sel.fExtended)
 	{
-		DelLineComment(hbuf,line)
+		DelLineComment(hbuf,wline)
 	}
 	DelLineComment(hbuf,sel.lnFirst)
 	DelLineComment(hbuf,sel.lnLast)
@@ -384,36 +389,36 @@ macro DelMultiCommet()
 *
 * @author  sharwen
 * 
-* @param   hbuf   handle buffer
-* @param   line   ln in handle buffer
+* @param[in]   hbuf   handle buffer
+* @param[in]   line   ln in handle buffer
 *
 * @return
 *    
 * @par  revise
-* @li   123, 2017/1/11, create new function
+* @li   Sharwen, 2017/1/11, create new function
 */
-macro DelLineComment(hbuf,line)
+macro DelLineComment(hbuf,wline)
 {
 	szline = GetBufLine(hbuf,line)
-	strButBlank = GetBlankSpace(szline,1)
-	strBlank = GetBlankSpace(szline,0)
-	lnlen = strlen(strButBlank)
-	if("" != strButBlank &&  lnlen>= 2)
+	szstrButBlank = GetBlankSpace(szline,1)
+	szstrBlank    = GetBlankSpace(szline,0)
+	wlnlen = strlen(szstrButBlank)
+	if("" != szstrButBlank &&  wlnlen>= 2)
 	{
-		if("/" == strButBlank[0] && "*" == strButBlank[1])
+		if("/" == szstrButBlank[0] && "*" == szstrButBlank[1])
 		{
-			strDeletedComment = strmid(strButBlank,2,strlen(strButBlank))
-			strDeletedComment = cat(strBlank,strDeletedComment)
-			DelBufLine(hbuf,line)
-			InsBufLine(hbuf,line,strDeletedComment)
+			szstrDeletedComment = strmid(szstrButBlank,2,strlen(szstrButBlank))
+			szstrDeletedComment = cat(szstrBlank,szstrDeletedComment)
+			DelBufLine(hbuf,wline)
+			InsBufLine(hbuf,wline,szstrDeletedComment)
 			
 		}
-		lnlen = strlen(strButBlank)
-		if(lnlen >=2 && "*" == strButBlank[lnlen-2] && "/" == strButBlank[lnlen-1])
+		wlnlen = strlen(szstrButBlank)
+		if(wlnlen >=2 && "*" == szstrButBlank[wlnlen-2] && "/" == szstrButBlank[wlnlen-1])
 		{
-			strDeletedComment = strmid(strButBlank,0,strlen(strButBlank)-2)
-			DelBufLine(hbuf,line)
-			InsBufLine(hbuf,line,strDeletedComment)
+			szstrDeletedComment = strmid(szstrButBlank,0,strlen(szstrButBlank)-2)
+			DelBufLine(hbuf,wline)
+			InsBufLine(hbuf,wline,szstrDeletedComment)
 		}
 	}
 }
@@ -425,12 +430,12 @@ macro DelLineComment(hbuf,line)
 *
 * @author  sharwen
 * 
-* @param   szline   a string
+* @param[in]   szline   a string
 *
 * @return
 *    
 * @par  revise
-* @li   123, 2017/1/11, create new function
+* @li   Sharwen, 2017/1/11, create new function
 */
 macro strTrimLeft(szline)
 {
@@ -444,36 +449,36 @@ macro strTrimLeft(szline)
 *
 * @author  sharwen
 * 
-* @param   szline   a string
+* @param[in]   szline   a string
 *
 * @return
 *    
 * @par  revise
-* @li   123, 2017/1/11, create new function
+* @li   Sharwen, 2017/1/11, create new function
 */
 macro strTrimRight(szline)
 {
-	ichFrist = 0
-    ichLast  = strlen(szline) -1 
-    if(0 > ichLast)
+	wichFrist = 0
+    wichLast  = strlen(szline) -1 
+    if(0 > wichLast)
     {
     	return ""
     }
 	chBlank = CharFromAscii(32)
     chTab   = CharFromAscii(9)
-	while(ichLast > ichFrist)
+	while(wichLast > wichFrist)
     {
-    	if((chBlank != szline[ichLast]) && (chTab != szline[ichLast]))
+    	if((chBlank != szline[wichLast]) && (chTab != szline[wichLast]))
     	{
     		break
     	}
-    	ichLast = ichLast - 1
+    	wichLast = wichLast - 1
     }
-    if(0 > ichLast)
+    if(0 > wichLast)
 	{
 		return ""
 	}
-    return strmid(szline,ichFrist,ichLast+1)
+    return strmid(szline,wichFrist,wichLast+1)
 }
 
 
@@ -483,18 +488,18 @@ macro strTrimRight(szline)
 *
 * @author  sharwen
 * 
-* @param   szline   a string
+* @param[in]   szline   a string
 *
 * @return
 *    
 * @par  revise
-* @li   123, 2017/1/11, create new function
+* @li   Sharwen, 2017/1/11, create new function
 */
 macro strTrim(szline)
 {
-	strLeft = strTrimLeft(szline)
-	str     = strTrimRight(strLeft)
-	return str;
+	szstrLeft = strTrimLeft(szline)
+	szstr     = strTrimRight(szstrLeft)
+	return szstr;
 }
 
 
@@ -504,59 +509,59 @@ macro strTrim(szline)
 *
 * @author  sharwen
 * 
-* @param   szline   a string
+* @param[in]   szline   a string
 *
 * @return
 *    	string
 * @par  revise
-* @li   123, 2017/1/11, create new function
+* @li   Sharwen, 2017/1/11, create new function
 */
 macro GetLineWithoutComment(szline)
 {	
-	RetStr = ""
+	szRetStr = ""
 	if(0 == strlen(szline))
 	{
-		return RetStr;
+		return szRetStr;
 	}
 	szline = strTrim(szline)
-	fInx = 0;
-	lInx = strlen(szline)
+	wfInx = 0;
+	wlInx = strlen(szline)
 	/*skip comment block*/
-	if(fInx >= 1)
+	if(wfInx >= 1)
 	{
-		if("/" == szline[fInx] && "*" == szline[fInx+1])
+		if("/" == szline[wfInx] && "*" == szline[wfInx+1])
 		{
-			while(fInx < lInx - 1)
+			while(wfInx < wlInx - 1)
 			{
-				if("*" == szline[fInx] && "/" == szline[fInx+1])
+				if("*" == szline[wfInx] && "/" == szline[wfInx+1])
 				{
-					fInx = fInx + 2;
+					wfInx = wfInx + 2;
 					break;
 				}
-				fInx = fInx + 1;
+				wfInx = wfInx + 1;
 			}
 		}
 	}
-	if(lInx >= 2)
+	if(wlInx >= 2)
 	{
-		if("*" == szline[lInx-2] && "/" == szline[lInx-1])
+		if("*" == szline[wlInx-2] && "/" == szline[wlInx-1])
 		{
-			while(0 < lInx - 2)
+			while(0 < wlInx - 2)
 			{
-				if("/" == szline[lInx-2] && "*" == szline[lInx-1])
+				if("/" == szline[wlInx-2] && "*" == szline[wlInx-1])
 				{
-					lInx = lInx - 3;
+					wlInx = wlInx - 3;
 					break;
 				}
-				lInx = lInx - 1;
+				wlInx = wlInx - 1;
 			}
 		}
 	}
-	if(fInx <= lInx)
+	if(wfInx <= wlInx)
 	{
-		return strmid(szline,fInx,lInx);
+		return strmid(szline,wfInx,wlInx);
 	}
-	return RetStr;
+	return szRetStr;
 }
 
 
@@ -567,34 +572,34 @@ macro GetLineWithoutComment(szline)
 *
 * @author  sharwen
 * 
-* @param   szline   a string
+* @param[in]   szline   a string
 *
 * @return
 *    	string
 * @par  revise
-* @li   123, 2017/1/11, create new function
+* @li   Sharwen, 2017/1/11, create new function
 */
 macro GetLastWord(szline)
 {
-	ichLast  = strlen(szline)
-	ichFrist = ichLast - 1
-	if(0 == ichLast)
+	wichLast  = strlen(szline)
+	wichFrist = wichLast - 1
+	if(0 == wichLast)
 	{
 		return ""
 	}
 	chBlack = CharFromAscii(32)
     chTab   = CharFromAscii(9)
     
-	while(0 <= ichFrist)
+	while(0 <= wichFrist)
 	{
-		if(chBlack == szline[ichFrist] || chTab == szline[ichFrist])
+		if(chBlack == szline[wichFrist] || chTab == szline[wichFrist])
 		{
 			break;
 		}
-		ichFrist = ichFrist - 1
+		wichFrist = wichFrist - 1
 	}
 
-	return strmid(szline,ichFrist+1,ichLast)
+	return strmid(szline,wichFrist+1,wichLast)
 }
 
 
@@ -604,35 +609,35 @@ macro GetLastWord(szline)
 *
 * @author  sharwen
 * 
-* @param   szline   a string
+* @param[in]   szline   a string
 *
 * @return
 *    	string
 * @par  revise
-* @li   123, 2017/1/13, create new function
+* @li   Sharwen, 2017/1/13, create new function
 */
 macro GetFristWord(szline)
 {
-	ichLast  = 0
-	ichFrist = 0
-	szLen    = strlen(szline)
-	if(0 == szLen)
+	wichLast  = 0
+	wichFrist = 0
+	wLen    = strlen(szline)
+	if(0 == wLen)
 	{
 		return ""
 	}
 	chBlack = CharFromAscii(32)
     chTab   = CharFromAscii(9)
     
-	while(ichLast < szLen)
+	while(wichLast < wLen)
 	{
-		if(chBlack == szline[ichLast] || chTab == szline[ichLast])
+		if(chBlack == szline[wichLast] || chTab == szline[wichLast])
 		{
 			break;
 		}
-		ichLast = ichLast + 1
+		wichLast = wichLast + 1
 	}
 
-	return strmid(szline,ichFrist,ichLast)
+	return strmid(szline,wichFrist,wichLast)
 }
 
 /**
@@ -641,67 +646,67 @@ macro GetFristWord(szline)
 *
 * @author  sharwen
 * 
-* @param   szline   a string
-* @param   hbuf     a handle buffer
-* @param   chBegin  a char in line,and need spilt starts here
-* @param   separater  separater char
-* @param   chEnd    a char in line,and need spilt ends here
+* @param[in]   szline   a string
+* @param[in]   hbuf     a handle buffer
+* @param[in]   chBegin  a char in line,and need spilt starts here
+* @param[in]   separater  separater char
+* @param[in]   chEnd    a char in line,and need spilt ends here
 *
 * @return
 *    	
 * @par  revise
-* @li   123, 2017/1/11, create new function
+* @li   Sharwen, 2017/1/11, create new function
 */
 macro SplitString(szline,hbuf,chBegin,separater,chEnd)
 {
-	ichFrist = 0;
-	ichLast  = strlen(szline)
-	if(0 == ichLast)
+	wichFrist = 0;
+	wichLast  = strlen(szline)
+	if(0 == wichLast)
 	{
 		return ""
 	}
 
-	while(ichFrist < ichLast)/**< locate the begion of string*/
+	while(wichFrist < wichLast)/**< locate the begion of string*/
 	{
-		if(chBegin == szline[ichFrist])
+		if(chBegin == szline[wichFrist])
 		{
 			break;
 		}
-		ichFrist = ichFrist + 1
+		wichFrist = wichFrist + 1
 	}
-	ichFrist = ichFrist + 1
+	wichFrist = wichFrist + 1
 
-	while(ichFrist < ichLast)/**< locate the end of string*/
+	while(wichFrist < wichLast)/**< locate the end of string*/
 	{
-		if(chEnd == szline[ichLast])
+		if(chEnd == szline[wichLast])
 		{
 			break;
 		}
-		ichLast = ichLast - 1
+		wichLast = wichLast - 1
 	}
 	
-	while(ichFrist < ichLast)/**<extract para list from string*/
+	while(wichFrist < wichLast)/**<extract para list from string*/
 	{
-		tmpInx = ichFrist
-		while((separater != szline[tmpInx]) && (tmpInx < ichLast))
+		wtmpInx = wichFrist
+		while((separater != szline[wtmpInx]) && (wtmpInx < wichLast))
 		{
-			tmpInx = tmpInx + 1
+			wtmpInx = wtmpInx + 1
 		}
 		
-		if(ichFrist == tmpInx) /**<avoid continuous separater*/
+		if(wichFrist == wtmpInx) /**<avoid continuous separater*/
 		
 {
-			ichFrist = ichFrist + 1
+			wichFrist = wichFrist + 1
 			continue
 		}
-		word = strmid(szline,ichFrist,tmpInx)
-		word = strTrim(word)
+		szword = strmid(szline,wichFrist,wtmpInx)
+		szword = strTrim(wword)
 
-		if("void" != word && "VOID" != word && nil != word)
+		if("void" != szword && "VOID" != szword && nil != szword)
 		{
-			AppendBufLine(hbuf,word)
+			AppendBufLine(hbuf,szword)
 		}
-		ichFrist = tmpInx + 1
+		wichFrist = wtmpInx + 1
 	}
 }
 
@@ -712,40 +717,40 @@ macro SplitString(szline,hbuf,chBegin,separater,chEnd)
 *
 * @author  sharwen
 * 
-* @param   hbuf     a handle buffer
-* @param   FuncListBuf  a handle buf,it include function para list when it excute finish
-* @param   symbol  use GetCurSymbol function get
+* @param[in]   hbuf     a handle buffer
+* @param[in]   FuncListBuf  a handle buf,it include function para list when it excute finish
+* @param[in]   symbol  use GetCurSymbol function get
 *
 * @return
 *    	
 * @par  revise
-* @li   123, 2017/1/11, create new function
+* @li   Sharwen, 2017/1/11, create new function
 */
 macro GetFuncParaList(hbuf,FuncListBuf,symbol)
 {
-	funcDef = ""
-	lnFrist = symbol.lnFirst
-	lnLast  = symbol.lnLim
-	while(lnFrist < lnLast)/**< get define of a function*/
+	szfuncDef = ""
+	wlnFrist = symbol.lnFirst
+	wlnLast  = symbol.lnLim
+	while(wlnFrist < wlnLast)/**< get define of a function*/
 	{
-		szline  = GetBufLine(hbuf,lnFrist)
-		line    = GetLineWithoutComment(szline)  /**< Get rid of Comment block in one line*/
-		line    = strTrim(line)				     /**< Get rid of BlackSpace block in one line*/
-		LInx    = strlen(line) - 1
-		funcDef = cat(funcDef,line)
-		lnFrist = LnFrist + 1
-		if(0 > LInx)
+		szline  = GetBufLine(hbuf,wlnFrist)
+		szline    = GetLineWithoutComment(szline)  /**< Get rid of Comment block in one line*/
+		szline    = strTrim(szline)				     /**< Get rid of BlackSpace block in one line*/
+		wLInx    = strlen(szline) - 1
+		szfuncDef = cat(szfuncDef,szline)
+		wlnFrist = wLnFrist + 1
+		if(0 > wLInx)
 		{
-			LInx = 0
+			wLInx = 0
 		}
-		if("{" == line[0] || "{" == line[LInx] || ";" == line[0] || ";" == line[LInx])/*function define finished*/
+		if("{" == line[0] || "{" == line[wLInx] || ";" == line[0] || ";" == line[wLInx])/*function define finished*/
 		{
-			ichLast = strlen(funcDef)
-			funcDef = strmid(funcDef,0,ichLast-1)
+			wichLast  = strlen(szfuncDef)
+			szfuncDef = strmid(szfuncDef,0,wichLast-1)
 			break;
 		}
 	}
-	SplitString(funcDef,FuncListBuf,"(",",",")")
+	SplitString(szfuncDef,FuncListBuf,"(",",",")")
 }
 
 
@@ -755,12 +760,12 @@ macro GetFuncParaList(hbuf,FuncListBuf,symbol)
 *
 * @author  sharwen
 * 
-* @param   word  word need to search
+* @param[in]   word  word need to search
 *
 * @return
 *    	
 * @par  revise
-* @li   123, 2017/1/11, create new function
+* @li   Sharwen, 2017/1/11, create new function
 */
 macro SearchForward(word)
 {
@@ -775,12 +780,12 @@ macro SearchForward(word)
 *
 * @author  sharwen
 * 
-* @param   word  word need to search
+* @param[in]   word  word need to search
 *
 * @return
 *    	
 * @par  revise
-* @li   123, 2017/1/11, create new function
+* @li   Sharwen, 2017/1/11, create new function
 */
 macro SearchBackward()
 {
@@ -798,16 +803,16 @@ macro SearchBackward()
 * @return
 *    	string  like 2017/1/11
 * @par  revise
-* @li   123, 2017/1/11, create new function
+* @li   Sharwen, 2017/1/11, create new function
 */
 macro GetCurTime()
 {	
 	CurTime = GetSystime(1)
-	year   = CurTime.year
-	month  = CurTime.month
-	day    = CurTime.day
-	Retval = "@year@/@month@/@day@"
-	return Retval
+	szyear   = CurTime.year
+	szmonth  = CurTime.month
+	szday    = CurTime.day
+	szRetval = "@szyear@/@szmonth@/@szday@"
+	return szRetval
 }
 
 
@@ -817,120 +822,120 @@ macro GetCurTime()
 *
 * @author  sharwen
 * 
-* @param   hbuf  a handle
-* @param   line  function define line number
-* @param   booldef  boo value ,when it equal 1,function defination;0,function realizaton
+* @param[in]   hbuf  a handle
+* @param[in]   wline  function define line number
+* @param[in]   booldef  boo value ,when it equal 1,function defination;0,function realizaton
 *
 * @return
 *    	
 * @par  revise
-* @li   123, 2017/1/11, create new function
+* @li   Sharwen, 2017/1/11, create new function
 */
-macro DFuncComment(hbuf,line,booldef)
+macro DFuncComment(hbuf,wline,booldef)
 {
 	if(0 != booldef && 1 != booldef)
 	{
 		return
 	}
 	symbol = GetCurSymbol()
-	brief  = ask("please intput brief of this function:")
-	brief  = cat("*    ",brief)
-	author = GSAutherName(0)
-	paraNum = 0
-	FuncListBuf = hnil
+	szbrief  = ask("please intput brief of this function:")
+	szbrief  = cat("*    ",szbrief)
+	szauthor = GSAutherName(0)
+	wparaNum = 0
+	hFuncListBuf = hnil
 	if(0 != strlen(symbol))
 	{
-		FuncListBuf = NewBuf("__FuncListBuf__")   /*use a temp buf to save para list*/
-	    if(hNil == FuncListBuf)
+		hFuncListBuf = NewBuf("__FuncListBuf__")   /*use a temp buf to save para list*/
+	    if(hNil == hFuncListBuf)
 	    {
 	        stop
 	    }
-		symbol = GetSymbolLocationFromLn(hbuf, line)
-		GetFuncParaList(hbuf,FuncListBuf,symbol)
-		paraNum = GetbufLineCount(FuncListBuf)
+		symbol = GetSymbolLocationFromLn(hbuf, wline)
+		GetFuncParaList(hbuf,hFuncListBuf,symbol)
+		wparaNum = GetbufLineCount(hFuncListBuf)
 	}
 	
-	InsBufLine(hbuf,line,"/**")
-	InsBufLine(hbuf,line+1,"* \@brief")
-	InsBufLine(hbuf,line+2,brief)
-	InsBufLine(hbuf,line+3,"*")
-	InsBufLine(hbuf,line+4,"* \@author  @author@")
-	InsBufLine(hbuf,line+5,"*")
-	newLine = line + 6
-	InsParaListLn = newline
+	InsBufLine(hbuf,wline,"/**")
+	InsBufLine(hbuf,wline+1,"* \@brief")
+	InsBufLine(hbuf,wline+2,szbrief)
+	InsBufLine(hbuf,wline+3,"*")
+	InsBufLine(hbuf,wline+4,"* \@author  @szauthor@")
+	InsBufLine(hbuf,wline+5,"*")
+	wnewLine = wline + 6
+	wInsParaListLn = wnewline
 	if(0 != strlen(symbol))
 	{
-		Inx = 0
-		while(Inx < paraNum)
+		wInx = 0
+		while(wInx < wparaNum)
 		{
-			szline = GetBufLine(FuncListBuf,Inx)
-			key    = GetLastWord(szline)
-			InsBufLine(hbuf,newline + Inx,"* \@param   @key@")
-			Inx = Inx + 1
+			szline = GetBufLine(hFuncListBuf,wInx)
+			szkey  = GetLastWord(szline)
+			InsBufLine(hbuf,wnewline + wInx,"* \@param   @szkey@")
+			wInx = wInx + 1
 		}
-		newline = newline + Inx
-		closeBuf(FuncListBuf)
+		wnewline = wnewline + wInx
+		closeBuf(hFuncListBuf)
 	}
 
-	StrCurtime = GetCurTime()
-	InsBufLine(hbuf,newline,"*")
-	InsBufLine(hbuf,newline+1,"* \@return")
-	InsBufLine(hbuf,newline+2,"*    ")
-	InsBufLine(hbuf,newline+3,"* \@par  revise")
-	InsBufLine(hbuf,newline+4,"* \@li   @author@, @StrCurtime@, create new function")
-	InsBufLine(hbuf,newline+5,"*/")
-	newline = newline + 6
+	szStrCurtime = GetCurTime()
+	InsBufLine(hbuf,wnewline,"*")
+	InsBufLine(hbuf,wnewline+1,"* \@return")
+	InsBufLine(hbuf,wnewline+2,"*    ")
+	InsBufLine(hbuf,wnewline+3,"* \@par  revise")
+	InsBufLine(hbuf,wnewline+4,"* \@li   @szauthor@, @szStrCurtime@, create new function")
+	InsBufLine(hbuf,wnewline+5,"*/")
+	wnewline = wnewline + 6
 
 	if(0 == strlen(symbol))  /**<new function*/
 	{
-		retType = ask("please input return type:")
-		func    = ask("please input function name:")
-		if(0 < strlen(func))
+		szretType = ask("please input return type:")
+		szfunc    = ask("please input function name:")
+		if(0 < strlen(szfunc))
 		{
 			if(0 == booldef)  /**<new function realization*/
 			{
-				InsBufline(hbuf,newline,"@retType@ @func@( # )")
-				InsBufline(hbuf,newline + 1,"{")
-				InsBufline(hbuf,newline + 2,"    ")
-				InsBufline(hbuf,newline + 3,"}")
-				newline = newline + 3
-				rightbracket = ")"
+				InsBufline(hbuf,wnewline,"@szretType@ @szfunc@( # )")
+				InsBufline(hbuf,wnewline + 1,"{")
+				InsBufline(hbuf,wnewline + 2,"    ")
+				InsBufline(hbuf,wnewline + 3,"}")
+				wnewline = wnewline + 3
+				szrightbracket = ")"
 			}
 			else   /**<new function define*/
 			{
-				InsBufline(hbuf,newline,"@retType@ @func@( # );")
-				newline = newline + 1
-				rightbracket = ");"
+				InsBufline(hbuf,wnewline,"@szretType@ @szfunc@( # );")
+				wnewline = wnewline + 1
+				szrightbracket = ");"
 			}
 			SearchForward("#")
 
-			frist_time = 1
-			curBufLn   = GetBufLnCur(hbuf)
+			wfrist_time = 1
+			wcurBufLn   = GetBufLnCur(hbuf)
 			while(true)
 			{
 				
-				szline   = GetBufLine(hbuf,curBufLn)
-				szlnLen  = strlen(szline)
-				if(0 == frist_time)
+				szline   = GetBufLine(hbuf,wcurBufLn)
+				wszlnLen  = strlen(szline)
+				if(0 == wfrist_time)
 				{
-					szline = strmid(szline,0,szlnLen - booldef -1)
+					szline = strmid(szline,0,wszlnLen - booldef -1)
 					szline = cat(szline,", ")
 				}
 				else
 				{
-					szline = strmid(szline,0,szlnLen - booldef - 3)
-					frist_time = 0
+					szline = strmid(szline,0,wszlnLen - booldef - 3)
+					wfrist_time = 0
 				}
 
 				
-				newParam = ask("please intput paraName:")
-				newParam = strTrim(newParam)
-				szline   = cat(szline,"@newParam@")
-				szline   = cat(szline,rightbracket)
-				putBufLine(hbuf,curBufLn,szline)
-				InsBufLine(hbuf,InsParaListLn,"* \@param   @newParam@")
-				InsParaListLn = InsParaListLn + 1
-				curBufLn = curBufLn + 1
+				sznewParam = ask("please intput paraName:")
+				sznewParam = strTrim(sznewParam)
+				szline   = cat(szline,"@sznewParam@")
+				szline   = cat(szline,szrightbracket)
+				putBufLine(hbuf,wcurBufLn,szline)
+				InsBufLine(hbuf,wInsParaListLn,"* \@param   @sznewParam@")
+				wInsParaListLn = wInsParaListLn + 1
+				wcurBufLn = wcurBufLn + 1
 			}
 			
 		}
@@ -946,7 +951,7 @@ macro DFuncComment(hbuf,line,booldef)
 * @author  sharwen
 * 
 * @param[in]   hbuf  a handle
-* @param[in]   line  function define line number
+* @param[in]   wline  function define line number
 * @param[in]   func  func name , #ifdef or #ifndef
 *
 * @return
@@ -954,30 +959,144 @@ macro DFuncComment(hbuf,line,booldef)
 * @par  revise
 * @li   Sharwen, 2017/1/11, create new function
 */
-macro defComment(hbuf,line,func)
+macro defComment(hbuf,wline,func)
 {
 	if(("#ifdef" != func) && ("#ifndef" != func) && ("#if" != func))
 	{
 		return
 	}
-	cmdszLine = GetBufLine(hbuf,line)
-	LeftBlanck = GetBlankSpace(cmdszline,0)
-	DelbufLine(hbuf,line)
-	cmd = GetCurLncmd(cmdszLine)
-	cmdLen    = strlen(cmd)
-	szlineLen = strlen(cmdszLine)
-	Key  = ""
-	if(cmdLen + 1 < szlineLen)/**< aleady input key*/
+	szcmdLine = GetBufLine(hbuf,wline)
+	szLeftBlanck = GetBlankSpace(szcmdLine,0)
+	DelbufLine(hbuf,wline)
+	szcmd = GetCurLncmd(szcmdLine)
+	wcmdLen    = strlen(szcmd)
+	wszlineLen = strlen(szcmdLine)
+	szKey  = ""
+	if(wcmdLen + 1 < wszlineLen)/**< aleady input key*/
 	{
-		Key = strmid(cmdszline,cmdLen+1,szlineLen)
+		szKey = strmid(szcmdline,wcmdLen+1,wszlineLen)
 	}
 	else
 	{
-		Key = ask("input key:")
+		szKey = ask("input key:")
 	}
-	InsertStr = cat(LeftBlanck,"@func@ @Key@")
-	InsBufline(hbuf,line,InsertStr)
-	InsBufline(hbuf,line+1,LeftBlanck)
-	InsBufline(hbuf,line+2,"@LeftBlanck@#endif /*@key@*/")
-	SetBufIns(hbuf,line+1,strLen(LeftBlanck))
+	szInsertStr = cat(szLeftBlanck,"@func@ @szKey@")
+	InsBufline(hbuf,wline,szInsertStr)
+	InsBufline(hbuf,wline+1,szLeftBlanck)
+	InsBufline(hbuf,wline+2,"@szLeftBlanck@#endif /*@szKey@*/")
+	SetBufIns(hbuf,wline+1,strLen(szLeftBlanck))
 }
+
+
+
+/**
+* @brief
+*    make up enum code block automaticly
+*
+* @author  sharwen
+* 
+* @param[in]   hbuf  a handle
+* @param[in]   wline  function define line number
+*
+* @return
+*    	
+* @par  revise
+* @li   Sharwen, 2017/1/14, create new function
+*/
+macro ENUMComment(hbuf,wline)
+{
+	szcmdLine = GetBufLine(hbuf,wline)
+	szLeftBlanck = GetBlankSpace(szcmdLine,0)
+	DelbufLine(hbuf,wline)
+	szcmd = GetCurLncmd(szcmdLine)
+	wcmdLen    = strlen(szcmd)
+	wszlineLen = strlen(szcmdLine)
+	szKey  = ""
+	if(wcmdLen + 1 < wszlineLen)/**< aleady input key*/
+	{
+		szKey = strmid(szcmdline,wcmdLen+1,wszlineLen)
+	}
+	else
+	{
+		szKey = ask("input key:")
+	}
+	szInsertStr = cat(szLeftBlanck,"typedef enum @szKey@")
+	InsBufLine(hbuf,wline,szInsertStr)
+	InsBufLine(hbuf,wline+1,"@szLeftBlanck@{")
+	InsBufLine(hbuf,wline+2,"    @szLeftBlanck@")
+	InsBufLine(hbuf,wline+3,"@szLeftBlanck@}ENUM_@szKey@;/*ENUM_@szKey@*/")
+	SetBufIns(hbuf,wline+2,strlen(szLeftBlanck) + 4)
+}
+
+
+/**
+* @brief
+*    convert all letter in a string to small letter
+*
+* @author  sharwen
+* 
+* @param[in]   szline  a string need to convert
+*
+* @return
+*    	
+* @par  revise
+* @li   Sharwen, 2017/1/14, create new function
+*/
+macro toSmallLetter(szline)
+{
+	dszLen = strlen(szline)
+	if(0 >= dszLen)
+	{
+		return
+	}
+	dInx = 0
+	iAsc = 0
+	cch  = ""
+	while(dInx < dszLen)
+	{
+		iAsc = AsciiFromChar(szline[dInx])
+		if(65 <= iAsc && 90 >= iAsc)  /*if this char is a upper case,convert it to a small*/
+		{
+			szline[dInx] = CharFromAscii(iAsc + 32);
+		}
+		dInx = dInx + 1;
+	}
+	return szline
+}
+
+
+/**
+* @brief
+*    convert all letter in a string to upper letter
+*
+* @author  sharwen
+* 
+* @param[in]   szline  a string need to convert
+*
+* @return
+*    	
+* @par  revise
+* @li   Sharwen, 2017/1/14, create new function
+*/
+macro toUpperLetter(szline)
+{
+	dszLen = strlen(szline)
+	if(0 >= dszLen)
+	{
+		return
+	}
+	dInx = 0
+	iAsc = 0
+	cch  = ""
+	while(dInx < dszLen)
+	{
+		iAsc = AsciiFromChar(szline[dInx])
+		if(97 <= iAsc && 122 >= iAsc)  /*if this char is a small case,convert it to a upper*/
+		{
+			szline[dInx] = CharFromAscii(iAsc - 32);
+		}
+		dInx = dInx + 1;
+	}
+	return szline
+}
+
