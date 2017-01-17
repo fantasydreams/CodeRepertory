@@ -305,6 +305,7 @@ macro delCurLine()
 *    
 * @par  revise
 * @li   Sharwen, 2017/1/11, create new function
+* @li   Sharwen, 2017/1/17, new requirement for comment,cursor locate at meddle of comment line
 */
 macro AddLineComment(hbuf,wline,dPreFlag,dLastFlag)
 {
@@ -321,7 +322,11 @@ macro AddLineComment(hbuf,wline,dPreFlag,dLastFlag)
 		szstr = cat(szstr,"*/") 
 	}
 	DelBufLine(hbuf, wline)
-        InsBufLine(hbuf, wline, szstr)
+	InsBufLine(hbuf, wline, szstr)
+	if(dLastFlag)
+	{
+		SetBufIns(hbuf,wline,strlen(szstr) - 2)
+	}
 }
 
 
