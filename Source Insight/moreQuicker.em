@@ -1104,3 +1104,21 @@ macro toUpperLetter(szline)
 	return szline
 }
 
+
+/**
+* @brief
+*    copy current line content to clipborad
+*
+* @author  sharwen
+*
+* @return
+*    	
+* @par  revise
+* @li   Sharwen, 2017/1/14, create new function
+*/
+macro CopyLnToClipBoard()
+{
+	hbuf = GetCurrentBuf()
+	wLn  = GetBufLnCur(hbuf)
+	copyBufLine(hbuf,wln)
+}
