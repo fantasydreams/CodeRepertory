@@ -313,13 +313,13 @@ macro AddLineComment(hbuf,wline,dPreFlag,dLastFlag)
 	if(0 != dPreFlag)
 	{
 		szBlackSpace = GetBlankSpace(szstr,0)
-		szBlackSpace = cat(szBlackSpace, "/*") 
+		szBlackSpace = cat(szBlackSpace, "/* ") 
 		szstr = GetBlankSpace(szstr,1)
 		szstr = cat(szBlackSpace,szstr)
 	}
 	if(0 != dLastFlag)
 	{
-		szstr = cat(szstr,"*/") 
+		szstr = cat(szstr," */") 
 	}
 	DelBufLine(hbuf, wline)
 	InsBufLine(hbuf, wline, szstr)
