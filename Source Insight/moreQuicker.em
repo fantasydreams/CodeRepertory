@@ -1241,7 +1241,7 @@ macro GetFileNameNoSuffix(szline)
 * @param[in]   hbuf  buffer handle
 * @param[in]   wline line number
 *
-* @return      wline , ����ע��֮�󣬷���ע�ͺ��һ�е��к�
+* @return      wline , return line number after insert coment block
 *    	
 * @par  revise
 * @li   Sharwen, 2017/1/25, create new function
