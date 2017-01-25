@@ -330,13 +330,13 @@ macro AddLineComment(hbuf,wline,dPreFlag,dLastFlag)
 	if(0 != dPreFlag)
 	{
 		szBlackSpace = GetBlankSpace(szstr,0)
-		szBlackSpace = cat(szBlackSpace, "/*") 
+		szBlackSpace = cat(szBlackSpace, "/* ") 
 		szstr = GetBlankSpace(szstr,1)
 		szstr = cat(szBlackSpace,szstr)
 	}
 	if(0 != dLastFlag)
 	{
-		szstr = cat(szstr,"*/") 
+		szstr = cat(szstr," */") 
 	}
 	DelBufLine(hbuf, wline)
 	InsBufLine(hbuf, wline, szstr)
@@ -1241,7 +1241,7 @@ macro GetFileNameNoSuffix(szline)
 * @param[in]   hbuf  buffer handle
 * @param[in]   wline line number
 *
-* @return      wline , ²åÈë×¢ÊÍÖ®ºó£¬·µ»Ø×¢ÊÍºóµÄÒ»ÐÐµÄÐÐºÅ
+* @return      wline , ï¿½ï¿½ï¿½ï¿½×¢ï¿½ï¿½Ö®ï¿½ó£¬·ï¿½ï¿½ï¿½×¢ï¿½Íºï¿½ï¿½Ò»ï¿½Ðµï¿½ï¿½Ðºï¿½
 *    	
 * @par  revise
 * @li   Sharwen, 2017/1/25, create new function
