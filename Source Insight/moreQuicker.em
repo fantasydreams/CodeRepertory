@@ -43,10 +43,15 @@ macro AutoExpand()
 *    
 * @par  revise
 * @li   Sharwen, 2017/1/11, create new function
+* @li   Sharwen, 2017/1/25, add hbuf nil judge statement
 */
 macro ExpandPorc(Lang)
 {
 	hbuf = GetCurrentBuf()
+	if(hnil == hbuf)
+	{
+		return
+	}
 	wcurLnNum = GetBufLnCur(hbuf)
 	szline    = GetBufLine(hbuf,wcurLnNum)
 	szcommand = GetCurLncmd(szline)
@@ -73,37 +78,49 @@ macro ExpandPorc(Lang)
 		DFuncComment(hbuf,wcurLnNum,1)
 		return
 	}
-	if("hd" == szcommand || "head" == szcommand)
-	{
-		DelBufline(hbuf,wcurLnNum)      /**<delete current line*/
-		HeadComment(hbuf)
-		return
-	}
 	if("#ifdef" == szcommand || "#ifd" == szcommand)/**< #ifdef code block*/
 	{
-		defComment(hbuf,wcurLnNum,"#ifdef")
+		DefComment(hbuf,wcurLnNum,"#ifdef",nil)
 		return
 	}
 	if("#ifndef" == szcommand || "#ifnd" == szcommand)/**< #ifndef code block*/
 	{
-		defComment(hbuf,wcurLnNum,"#ifndef")
+		DefComment(hbuf,wcurLnNum,"#ifndef",nil)
 		return
 	}
 	if("#if" == szcommand)/**< #if code block*/
 	{
-		defComment(hbuf,wcurLnNum,"#if")
+		DefComment(hbuf,wcurLnNum,"#if",nil)
 		return
 	}
 	if("enum" == szcommand || "en" == szcommand)
 	{
 		ENUMComment(hbuf,wcurLnNum)
+		return
+	}
+	if("hd" == szcommand || "head" == szcommand)
+	{
+		HeaderFileComment(hbuf,0,wcurLnNum)
+		return
+	}
+	if("hdn" == szcommand || "headn" == szcommand)
+	{
+		HeaderFileComment(hbuf,1,wcurLnNum)
+		return
+	}
+	if("cpp" == szcommand)
+	{
+		InsertCPP(hbuf,wcurLnNum)
 	}
 
-	else if("config" == szcommand || "conf" == szcommand)
+
+	
+	if("config" == szcommand || "conf" == szcommand)
 	{
 		configSystem()
 		return
 	}
+	
 	
 }
 
@@ -957,13 +974,15 @@ macro DFuncComment(hbuf,wline,booldef)
 * @param[in]   hbuf  a handle
 * @param[in]   wline  function define line number
 * @param[in]   func  func name , #ifdef or #ifndef
+* @param[in]   szfilename  filename  nil or a string
 *
 * @return
 *    	
 * @par  revise
 * @li   Sharwen, 2017/1/11, create new function
+* @li   Sharwen, 2017/1/125, revise function interface
 */
-macro defComment(hbuf,wline,func)
+macro DefComment(hbuf,wline,func,szfilename)
 {
 	if(("#ifdef" != func) && ("#ifndef" != func) && ("#if" != func))
 	{
@@ -982,11 +1001,24 @@ macro defComment(hbuf,wline,func)
 	}
 	else
 	{
-		szKey = ask("input key:")
+		if(0 == strlen(szfilename))
+		{
+			szKey = ask("input key:")
+		}
+		else
+		{
+			szkey = szfilename
+		}
 	}
 	szInsertStr = cat(szLeftBlanck,"@func@ @szKey@")
 	InsBufline(hbuf,wline,szInsertStr)
-	InsBufline(hbuf,wline+1,szLeftBlanck)
+	
+	if("#ifndef" == func)
+	{
+		wline = wline + 1
+		InsBufline(hbuf,wline,"#define @szkey@")
+	}
+	InsBufLine(hbuf,wline+1,"@szLeftBlanck@")
 	InsBufline(hbuf,wline+2,"@szLeftBlanck@#endif /*@szKey@*/")
 	SetBufIns(hbuf,wline+1,strLen(szLeftBlanck))
 }
@@ -1121,4 +1153,248 @@ macro CopyLnToClipBoard()
 	hbuf = GetCurrentBuf()
 	wLn  = GetBufLnCur(hbuf)
 	copyBufLine(hbuf,wln)
+}
+
+/**
+* @brief
+*    get filename such as 1.cpp
+*
+* @author  sharwen
+*
+* @param[in]  szline  a sring
+*
+* @return
+*    	a string, szname
+* @par  revise
+* @li   Sharwen, 2017/1/25, create new function
+*/
+macro GetFileName(szline)
+{
+	wLen = strlen(szline)
+	szname = ""
+	if(0 == wLen)
+	{
+		return szname
+	}
+	wLoc = wLen
+	while(0 <= wLoc)
+	{
+		if("\\" == szline[wLoc])
+		{
+			break;
+		}
+		wLoc = wLoc - 1
+	}
+	return strmid(szline,wLoc + 1,wLen)
+}
+
+
+/**
+* @brief
+*    get filename without suffix string
+*
+* @author  sharwen
+*
+* @param[in]  szline  a sring
+*
+* @return
+*    	a string, szname
+* @par  revise
+* @li   Sharwen, 2017/1/25, create new function
+*/
+macro GetFileNameNoSuffix(szline)
+{
+	wLen = strlen(szline)
+	szname = ""
+	wLoc   = 0
+	if(0 == wLen)
+	{
+		return szname
+	}
+
+	szline = GetFileName(szline)
+	wLen = strlen(szline)
+	if(0 == wLen)
+	{
+		return szname
+	}
+
+	while(wLoc <= wLen)
+	{
+		if("." == szline[wLoc])
+		{
+			szname = strmid(szline,0,wLoc)
+			break;
+		}
+		wLoc = wLoc + 1
+	}
+	return szname
+}
+
+
+/**
+* @brief
+*    insert head file comment automatically
+*
+* @author  sharwen
+*
+* @param[in]   hbuf  buffer handle
+* @param[in]   wline line number
+*
+* @return      wline , 插入注释之后，返回注释后的一行的行号
+*    	
+* @par  revise
+* @li   Sharwen, 2017/1/25, create new function
+*/
+macro HeadComment(hbuf,wline)
+{
+	szfilename = ""
+	szauthor   = GSAutherName(0)
+	szdate     = GetCurTime()
+	szfullname = GetBufName(hbuf)
+	szfilename = GetFileName(szfullname)
+	szdefKey   = GetFileNameNoSuffix(szfilename)
+
+	InsBufLine(hbuf,wline,"/**")
+	InsBufLine(hbuf,wline + 1,"* \@file  @szfilename@")
+	InsBufLine(hbuf,wline + 2,"* \@brief")
+	InsBufLine(hbuf,wline + 3,"*     @szdefkey@.cpp file's header file")
+	InsBufLine(hbuf,wline + 4,"* \@author   @szauthor@")
+	InsBufLine(hbuf,wline + 5,"* \@date     @szdate@")
+	InsBufLine(hbuf,wline + 6,"* \@version  1.0")
+	InsBufLine(hbuf,wline + 7,"* \@note")
+	InsBufLine(hbuf,wline + 8,"*")
+	InsBufLine(hbuf,wline + 9,"* function list")
+	InsBufLine(hbuf,wline + 10,"*")
+	InsBufLine(hbuf,wline + 11,"* \@par  revise")
+	InsBufLine(hbuf,wline + 12,"* \@li   @szauthor@, @szdate@, create file")
+	InsBufLine(hbuf,wline + 13,"*/")
+	InsBufLine(hbuf,wline + 14,"")
+	
+	wline = wline + 14
+	return wline
+}
+
+/**
+* @brief
+*    insert head file(.h) comment automatically
+*
+* @author  sharwen
+*
+* @param[in]   hbuf  buffer handle
+* @param[in]   bNew  bool value, 1 means create new buffer .h file,0 means comment in old .h file
+*
+* @return
+*    	
+* @par  revise
+* @li   Sharwen, 2017/1/25, create new function
+*/
+macro HeaderFileComment(hbuf,bNew,wline)
+{
+	hbufn  = hbuf
+	szline = GetBufLine(hbuf,wline)
+	DelBufLine(hbuf,wline)
+	
+	if(1 == bNew)
+	{
+		szfilename = GetLastWord(szline)
+		if(strlen(szfilename) == strlen(szline))
+		{
+			szfilename = ask("please input filename:")
+		}
+		hbufn = newBuf(szfilename)
+		SetCurrentBuf(hbufn)
+		wline = 0
+	}
+	
+	wline = HeadComment(hbufn,wline)
+	
+	InsBufLine(hbufn,wline + 1,"/*----------------------------------------------*")
+	InsBufLine(hbufn,wline + 2," *                include                       *")
+	InsBufLine(hbufn,wline + 3," *----------------------------------------------*/")
+	InsBufLine(hbufn,wline + 4,"")
+	wline = wline + 4
+	
+	InsBufLine(hbufn,wline + 1,"/*----------------------------------------------*")
+	InsBufLine(hbufn,wline + 2," *                define                        *")
+	InsBufLine(hbufn,wline + 3," *----------------------------------------------*/")
+	InsBufLine(hbufn,wline + 4,"")
+	wline = wline + 4
+	
+	InsBufLine(hbufn,wline + 1,"/*----------------------------------------------*")
+	InsBufLine(hbufn,wline + 2," *                extern                        *")
+	InsBufLine(hbufn,wline + 3," *----------------------------------------------*/")
+	InsBufLine(hbufn,wline + 4,"")
+	wline = wline + 4
+	
+	InsBufLine(hbufn,wline + 1,"/*----------------------------------------------*")
+	InsBufLine(hbufn,wline + 2," *                global                        *")
+	InsBufLine(hbufn,wline + 3," *----------------------------------------------*/")
+	InsBufLine(hbufn,wline + 4,"")
+	wline = wline + 4
+	
+	InsBufLine(hbufn,wline + 1,"/*----------------------------------------------*")
+	InsBufLine(hbufn,wline + 2," *                function                      *")
+	InsBufLine(hbufn,wline + 3," *----------------------------------------------*/")
+	InsBufLine(hbufn,wline + 4,"")
+	wline = wline + 4
+
+	wline = wline + 1
+	InsBufLine(hbufn,wline,"")
+	szdefKey = cat("__",szdefKey)
+	szdefKey = cat(szdefKey,"__")
+	DefComment(hbufn,wline,"#ifndef",szdefKey)
+
+	wline = GetBufLnCur(hbufn)
+	InsBufLine(hbufn,wline + 1,"")
+	InsBufLine(hbufn,wline + 2,"")
+	InsBufLine(hbufn,wline + 3,"")
+	InsBufLine(hbufn,wline + 4,"")
+	SetBufIns(hbufn,wline + 2,0)
+
+	InsertCPP(hbufn,wline + 2)
+}
+
+
+/**
+* @brief
+*    insert __cplusplus code block
+*
+* @author  sharwen
+*
+* @param[in]   hbuf  buffer handle
+* @param[in]   wline line bumber
+*
+* @return
+*    	
+* @par  revise
+* @li   Sharwen, 2017/1/25, create new function
+*/
+macro InsertCPP(hbuf,wline)
+{
+	DefComment(hbuf,wline,"#ifdef",__cplusplus)
+
+	wline = GetBufLnCur(hbuf)
+	DefComment(hbuf,wline,"#if",__cplusplus)
+	
+	wline = GetBufLnCur(hbuf)
+	InsBufLine(hbuf,wline,"extern \"C\"{")
+	DelBufLine(hbuf,wline + 1)
+
+	wline = wline + 3
+	InsBufLine(hbuf,wline,"")
+	InsBufLine(hbuf,wline + 1,"")
+	InsBufLine(hbuf,wline + 2,"")
+	InsBufLine(hbuf,wline + 3,"")
+
+	wline = wline + 3
+	DefComment(hbuf,wline,"#ifdef",__cplusplus)
+	
+	wline = GetBufLnCur(hbuf)
+	DefComment(hbuf,wline,"#if",__cplusplus)
+	
+	wline = GetBufLnCur(hbuf)
+	InsBufLine(hbuf,wline,"}")
+	DelBufLine(hbuf,wline + 1)
+	SetBufIns(hbuf,wline - 4,0)
 }
