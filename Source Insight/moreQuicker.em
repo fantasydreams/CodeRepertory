@@ -51,6 +51,8 @@ macro ExpandPorc(Lang)
 	if(hnil == hbuf)
 	{
 		return
+	}
+
 	wcurLnNum = GetBufLnCur(hbuf)
 	szline    = GetBufLine(hbuf,wcurLnNum)
 	szcommand = GetCurLncmd(szline)
