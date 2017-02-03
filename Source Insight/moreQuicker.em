@@ -51,19 +51,16 @@ macro ExpandPorc(Lang)
 	if(hnil == hbuf)
 	{
 		return
-	}
 	wcurLnNum = GetBufLnCur(hbuf)
 	szline    = GetBufLine(hbuf,wcurLnNum)
 	szcommand = GetCurLncmd(szline)
 	szcommand = toSmallLetter(szcommand)
-	szlineWhite = GetBlankSpace(szline,0)
-	szlineWhiteWhitTab = "@szlineWhite@" # "    "
 
 	if("{" == szcommand)
 	{
-		InsBufLine(hbuf,wcurLnNum+1,"@szlineWhiteWhitTab@")
-		InsBufLine(hbuf,wcurLnNum+2,"@szlineWhite@" # "}")
-		SetBufIns (hbuf,wcurLnNum+1,strlen(szlineWhiteWhitTab))
+		szLineBlank = GetBlankSpace(szline,0)
+		delBufLine(hbuf,wcurLnNum)
+		InsertBracket(hbuf,wcurLnNum,szLineBlank)
 		return
 	}
 	if("dfunc" == szcommand || "df" == szcommand)
@@ -112,7 +109,11 @@ macro ExpandPorc(Lang)
 	{
 		InsertCPP(hbuf,wcurLnNum)
 	}
-
+	if("while" == szcommand)
+	{
+		InsertWhile(hbuf,wcurLnNum)
+		return
+	}
 
 	
 	if("config" == szcommand || "conf" == szcommand)
@@ -980,7 +981,8 @@ macro DFuncComment(hbuf,wline,booldef)
 *    	
 * @par  revise
 * @li   Sharwen, 2017/1/11, create new function
-* @li   Sharwen, 2017/1/125, revise function interface
+* @li   Sharwen, 2017/1/25, revise function interface
+* @li   Sharwen, 2017/2/3 , fix a bug which when there input some blank space in left,the key is nor correct
 */
 macro DefComment(hbuf,wline,func,szfilename)
 {
@@ -992,12 +994,12 @@ macro DefComment(hbuf,wline,func,szfilename)
 	szLeftBlanck = GetBlankSpace(szcmdLine,0)
 	DelbufLine(hbuf,wline)
 	szcmd = GetCurLncmd(szcmdLine)
-	wcmdLen    = strlen(szcmd)
+	wLenWithoutKey = strlen(szcmd) + strlen(szLeftBlanck)
 	wszlineLen = strlen(szcmdLine)
 	szKey  = ""
-	if(wcmdLen + 1 < wszlineLen)/**< aleady input key*/
+	if(wLenWithoutKey + 1 < wszlineLen)/**< aleady input key*/
 	{
-		szKey = strmid(szcmdline,wcmdLen+1,wszlineLen)
+		szKey = strmid(szcmdline,wLenWithoutKey + 1,wszlineLen)
 	}
 	else
 	{
@@ -1397,4 +1399,79 @@ macro InsertCPP(hbuf,wline)
 	InsBufLine(hbuf,wline,"}")
 	DelBufLine(hbuf,wline + 1)
 	SetBufIns(hbuf,wline - 4,0)
+}
+
+
+/**
+* @brief
+*    insert while code block
+*
+* @author  sharwen
+*
+* @param[in]   hbuf  buffer handle
+* @param[in]   wline line bumber
+*
+* @return
+*    	
+* @par  revise
+* @li   Sharwen, 2017/2/3, create new function
+*/
+macro InsertWhile(hbuf,wline)
+{
+	szCmdLine    = GetBufLine(hbuf,wline)
+	szBlankSpace = GetBlankSpace(szCmdLine,0)
+	delBufLine(hbuf,wline)
+
+	szCmd = GetCurLncmd(szCmdLine)
+	szKey = ""
+	wLenWithoutKey = strlen(szCmd) + strlen(szBlankSpace)
+	wLineLen = strlen(szCmdLine)
+	bKeyFlag = false
+	
+	if(wLenWithoutKey + 1 < wLineLen)/**< aleady input key*/
+	{
+		szkey = strmid(szCmdLine,wLenWithoutKey + 1,wLineLen)
+		bKeyFlag = true
+	}
+	else
+	{
+		szKey = "#"
+	}
+
+	szStr = cat(szBlankSpace,"while( ")
+	szStr = cat(szStr,szKey)
+	szStr = cat(szStr," )")
+
+	InsBufLine(hbuf,wline,szStr)
+	InsertBracket(hbuf,wline + 1,szBlankSpace)
+
+	if(false == bKeyFlag)
+	{
+		SearchBackward("#")
+	}
+}
+
+
+
+/**
+* @brief
+*    insert while code block
+*
+* @author  sharwen
+*
+* @param[in]   hbuf  buffer handle
+* @param[in]   wline line bumber
+* @param[in]   szBlankSpace left BlankSpace String
+*
+* @return
+*    	
+* @par  revise
+* @li   Sharwen, 2017/2/3, create new function
+*/
+macro InsertBracket(hbuf,wline,szBlankSpace)
+{
+	InsBufLine(hbuf,wline,"@szBlankSpace@{")
+	InsBufLine(hbuf,wline + 1,"@szBlankSpace@    ")
+	InsBufLine(hbuf,wline + 2,"@szBlankSpace@}")
+	SetBufIns(hbuf,wline + 1,strlen(szBlankSpace) + 4)
 }
