@@ -52,7 +52,6 @@ macro ExpandPorc(Lang)
 	{
 		return
 	}
-
 	wcurLnNum = GetBufLnCur(hbuf)
 	szline    = GetBufLine(hbuf,wcurLnNum)
 	szcommand = GetCurLncmd(szline)
@@ -116,7 +115,11 @@ macro ExpandPorc(Lang)
 		InsertWhile(hbuf,wcurLnNum)
 		return
 	}
-
+	if("li" == szcommand)
+	{
+		InsertHistory(hbuf,wcurLnNum)
+		return
+	}
 	
 	if("config" == szcommand || "conf" == szcommand)
 	{
@@ -811,9 +814,9 @@ macro SearchForward(word)
 * @par  revise
 * @li   Sharwen, 2017/1/11, create new function
 */
-macro SearchBackward()
+macro SearchBackward(word)
 {
-    LoadSearchPattern("#", 1, 0, 1);
+    LoadSearchPattern(word, 1, 0, 1);
     Search_Backward
 }
 
@@ -984,7 +987,7 @@ macro DFuncComment(hbuf,wline,booldef)
 * @par  revise
 * @li   Sharwen, 2017/1/11, create new function
 * @li   Sharwen, 2017/1/25, revise function interface
-* @li   Sharwen, 2017/2/3 , fix a bug which when there input some blank space in left,the key is nor correct
+* @li   Sharwen, 2017/2/3,  fix a bug which when there input some blank space in left,the key is nor correct
 */
 macro DefComment(hbuf,wline,func,szfilename)
 {
@@ -994,36 +997,30 @@ macro DefComment(hbuf,wline,func,szfilename)
 	}
 	szcmdLine = GetBufLine(hbuf,wline)
 	szLeftBlanck = GetBlankSpace(szcmdLine,0)
+	szPara = GetPara(szcmdLine)
 	DelbufLine(hbuf,wline)
-	szcmd = GetCurLncmd(szcmdLine)
-	wLenWithoutKey = strlen(szcmd) + strlen(szLeftBlanck)
-	wszlineLen = strlen(szcmdLine)
-	szKey  = ""
-	if(wLenWithoutKey + 1 < wszlineLen)/**< aleady input key*/
-	{
-		szKey = strmid(szcmdline,wLenWithoutKey + 1,wszlineLen)
-	}
-	else
+
+	if("#" == szPara)
 	{
 		if(0 == strlen(szfilename))
 		{
-			szKey = ask("input key:")
+			szPara = ask("input key:")
 		}
 		else
 		{
-			szkey = szfilename
+			szPara = szfilename
 		}
 	}
-	szInsertStr = cat(szLeftBlanck,"@func@ @szKey@")
+	szInsertStr = cat(szLeftBlanck,"@func@ @szPara@")
 	InsBufline(hbuf,wline,szInsertStr)
 	
 	if("#ifndef" == func)
 	{
 		wline = wline + 1
-		InsBufline(hbuf,wline,"#define @szkey@")
+		InsBufline(hbuf,wline,"#define @szPara@")
 	}
 	InsBufLine(hbuf,wline+1,"@szLeftBlanck@")
-	InsBufline(hbuf,wline+2,"@szLeftBlanck@#endif /*@szKey@*/")
+	InsBufline(hbuf,wline+2,"@szLeftBlanck@#endif /*@szPara@*/")
 	SetBufIns(hbuf,wline+1,strLen(szLeftBlanck))
 }
 
@@ -1042,28 +1039,25 @@ macro DefComment(hbuf,wline,func,szfilename)
 *    	
 * @par  revise
 * @li   Sharwen, 2017/1/14, create new function
+* @li   Sharwen, 2017/2/4 , szkey convert into upper letter string
 */
 macro ENUMComment(hbuf,wline)
 {
 	szcmdLine = GetBufLine(hbuf,wline)
 	szLeftBlanck = GetBlankSpace(szcmdLine,0)
+	szKey = GetPara(szcmdLine)
 	DelbufLine(hbuf,wline)
-	szcmd = GetCurLncmd(szcmdLine)
-	wcmdLen    = strlen(szcmd)
-	wszlineLen = strlen(szcmdLine)
-	szKey  = ""
-	if(wcmdLen + 1 < wszlineLen)/**< aleady input key*/
-	{
-		szKey = strmid(szcmdline,wcmdLen+1,wszlineLen)
-	}
-	else
+	
+	if("#" == szKey)
 	{
 		szKey = ask("input key:")
 	}
+
 	szInsertStr = cat(szLeftBlanck,"typedef enum @szKey@")
 	InsBufLine(hbuf,wline,szInsertStr)
 	InsBufLine(hbuf,wline+1,"@szLeftBlanck@{")
 	InsBufLine(hbuf,wline+2,"    @szLeftBlanck@")
+	szKey = ToUpperLetter(szKey)
 	InsBufLine(hbuf,wline+3,"@szLeftBlanck@}ENUM_@szKey@;/*ENUM_@szKey@*/")
 	SetBufIns(hbuf,wline+2,strlen(szLeftBlanck) + 4)
 }
@@ -1082,7 +1076,7 @@ macro ENUMComment(hbuf,wline)
 * @par  revise
 * @li   Sharwen, 2017/1/14, create new function
 */
-macro toSmallLetter(szline)
+macro ToSmallLetter(szline)
 {
 	dszLen = strlen(szline)
 	if(0 >= dszLen)
@@ -1118,7 +1112,7 @@ macro toSmallLetter(szline)
 * @par  revise
 * @li   Sharwen, 2017/1/14, create new function
 */
-macro toUpperLetter(szline)
+macro ToUpperLetter(szline)
 {
 	dszLen = strlen(szline)
 	if(0 >= dszLen)
@@ -1257,12 +1251,11 @@ macro HeadComment(hbuf,wline)
 	szdate     = GetCurTime()
 	szfullname = GetBufName(hbuf)
 	szfilename = GetFileName(szfullname)
-	szdefKey   = GetFileNameNoSuffix(szfilename)
 
 	InsBufLine(hbuf,wline,"/**")
 	InsBufLine(hbuf,wline + 1,"* \@file  @szfilename@")
 	InsBufLine(hbuf,wline + 2,"* \@brief")
-	InsBufLine(hbuf,wline + 3,"*     @szdefkey@.cpp file's header file")
+	InsBufLine(hbuf,wline + 3,"*     @szfilename@ file's header file")
 	InsBufLine(hbuf,wline + 4,"* \@author   @szauthor@")
 	InsBufLine(hbuf,wline + 5,"* \@date     @szdate@")
 	InsBufLine(hbuf,wline + 6,"* \@version  1.0")
@@ -1310,6 +1303,11 @@ macro HeaderFileComment(hbuf,bNew,wline)
 		SetCurrentBuf(hbufn)
 		wline = 0
 	}
+	else
+	{
+		szfullname = GetBufName(hbuf)
+		szfilename = GetFileName(szfullname)
+	}
 	
 	wline = HeadComment(hbufn,wline)
 	
@@ -1344,7 +1342,9 @@ macro HeaderFileComment(hbuf,bNew,wline)
 	wline = wline + 4
 
 	wline = wline + 1
+
 	InsBufLine(hbufn,wline,"")
+	szdefKey   = GetFileNameNoSuffix(szfilename)
 	szdefKey = cat("__",szdefKey)
 	szdefKey = cat(szdefKey,"__")
 	DefComment(hbufn,wline,"#ifndef",szdefKey)
@@ -1404,6 +1404,7 @@ macro InsertCPP(hbuf,wline)
 }
 
 
+
 /**
 * @brief
 *    insert while code block
@@ -1417,31 +1418,17 @@ macro InsertCPP(hbuf,wline)
 *    	
 * @par  revise
 * @li   Sharwen, 2017/2/3, create new function
+* @li   Sharwen, 2017/2/4, extract get para code into a function
 */
 macro InsertWhile(hbuf,wline)
 {
 	szCmdLine    = GetBufLine(hbuf,wline)
 	szBlankSpace = GetBlankSpace(szCmdLine,0)
+	szPara = GetPara(szCmdLine)
 	delBufLine(hbuf,wline)
 
-	szCmd = GetCurLncmd(szCmdLine)
-	szKey = ""
-	wLenWithoutKey = strlen(szCmd) + strlen(szBlankSpace)
-	wLineLen = strlen(szCmdLine)
-	bKeyFlag = false
-	
-	if(wLenWithoutKey + 1 < wLineLen)/**< aleady input key*/
-	{
-		szkey = strmid(szCmdLine,wLenWithoutKey + 1,wLineLen)
-		bKeyFlag = true
-	}
-	else
-	{
-		szKey = "#"
-	}
-
 	szStr = cat(szBlankSpace,"while( ")
-	szStr = cat(szStr,szKey)
+	szStr = cat(szStr,szPara)
 	szStr = cat(szStr," )")
 
 	InsBufLine(hbuf,wline,szStr)
@@ -1476,4 +1463,66 @@ macro InsertBracket(hbuf,wline,szBlankSpace)
 	InsBufLine(hbuf,wline + 1,"@szBlankSpace@    ")
 	InsBufLine(hbuf,wline + 2,"@szBlankSpace@}")
 	SetBufIns(hbuf,wline + 1,strlen(szBlankSpace) + 4)
+}
+
+
+/**
+* @brief
+*    insert revise history comment
+*
+* @author  sharwen
+*
+* @param[in]   hbuf  buffer handle
+* @param[in]   wline line bumber
+*
+* @return
+*    	
+* @par  revise
+* @li   Sharwen, 2017/2/3, create new function
+*/
+macro InsertHistory(hbuf,wline)
+{
+	szCmdLine    = GetBufLine(hbuf,wline)
+	szBlankSpace = GetBlankSpace(szCmdLine,0)
+	szPara = GetPara(szCmdLine)
+	delBufLine(hbuf,wline)
+
+	if("#" == szPara)
+	{
+		szPara = ask("please input revise brief")
+	}
+
+	szAuthor = GSAutherName(0)
+	szTime   = GetCurTime()
+	InsBufLine(hbuf,wline,"* \@li   @szAuthor@, @szTime@, @szPara@")
+}
+
+
+/**
+* @brief
+*    Get para string in a cmd line
+*
+* @author  sharwen
+*
+* @param[in]   szCmdLine  a string with command and parameter
+*
+* @return
+*    	szkey , a string
+* @par  revise
+* @li   Sharwen, 2017/2/4, create new function
+*/
+macro GetPara(szCmdLine)
+{
+	szBlankSpace = GetBlankSpace(szCmdLine,0)
+
+	szCmd  = GetCurLncmd(szCmdLine)
+	szPara = "#"
+	wLenWithoutPara = strlen(szCmd) + strlen(szBlankSpace)
+	wLineLen = strlen(szCmdLine)
+	
+	if(wLenWithoutPara + 1 < wLineLen)/**< aleady input key*/
+	{
+		szPara = strmid(szCmdLine,wLenWithoutPara + 1,wLineLen)
+	}
+	return szPara
 }
