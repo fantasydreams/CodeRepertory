@@ -1,3 +1,16 @@
+/**  the functions of this list need take a new & differrent keyboard shortcut
+ *
+ *   AutoExpand()
+ *   DelCurLine()
+ *   AddMultiComment()
+ *   DelMultiCommet()
+ *   CopyLnToClipBoard()
+ *   CommentBehind()
+ *   CommentContentLine()
+ */
+
+
+
 /**
 * @brief
 *    source insight expand macro interface
@@ -1525,4 +1538,115 @@ macro GetPara(szCmdLine)
 		szPara = strmid(szCmdLine,wLenWithoutPara + 1,wLineLen)
 	}
 	return szPara
+}
+
+/**
+* @brief
+*    comment behind class or enum and so on
+*
+* @author  sharwen
+*
+* @param[in]   szCmdLine  a string with command and parameter
+*
+* @return
+*    	szkey , a string
+* @par  revise
+* @li   Sharwen, 2017/2/6, create new function
+*
+* @attention this macro need take a new keyboard shortcut
+*/
+macro CommentBehind()
+{
+	hbuf  = GetCurrentbuf()
+	wline = GetBufLnCur(hbuf)
+	
+	InsBufLine(hbuf,wline,"/**")
+	InsBufLine(hbuf,wline + 1," *")
+	InsBufLine(hbuf,wline + 2," *")
+	InsBufLine(hbuf,wline + 3," */")
+}
+
+
+/**
+* @brief
+*   Get content after ";" in one code line or GetContent before ";"
+*
+* @author  sharwen
+*
+* @param[in]   szCmdLine  a string with command and parameter
+* @param[in]   bFlag ,bool vlaue ,0 means get after,otherwise get
+*
+* @return
+*    	szkey , a string
+* @par  revise
+* @li   Sharwen, 2017/2/6, create new function
+*/
+macro GetContentSemicolon(szline,bFlag)
+{
+	wStrLen = strlen(szline)
+	if(0 == wStrLen)
+	{
+		return ""
+	}
+
+	wIndex = 0
+	while(wIndex < wStrLen)
+	{
+		if(";" == szline[wIndex])
+		{
+			break;
+		}
+		wIndex = wIndex + 1
+	}
+	
+	if(bFLag)
+	{
+		if(wIndex == wStrlen)
+		{
+			return ""
+		}
+		return strmid(szline,0,wIndex)
+	}
+
+	if(wIndex == wStrLen)
+	{
+		return strmid(szline,0,wStrlen)
+	}
+	return strmid(szline,wIndex + 1,wStrlen)
+}
+
+
+/**
+* @brief
+*   write comment member of a class or write comment something up a code line or at the end if code line
+*
+* @author  sharwen
+*
+* @return
+*    	szkey , a string
+* @par  revise
+* @li   Sharwen, 2017/2/6, create new function
+*
+* @attention this macro need take a new keyboard shortcut
+*/
+macro CommentContentLine()
+{
+	hbuf   = GetCurrentBuf()
+	wline  = GetBufLnCur(hbuf)
+	szline = GetBufLine(hbuf,wline)
+
+	szContentBeforeSemicolon = GetContentSemicolon(szline,1)
+	szContentAfterSemicolon  = GetContentSemicolon(szline,0)
+	szContentAfterSemicolon  = strTrim(szContentAfterSemicolon)
+
+	DelBufLine(hbuf,wline)
+	if("" == szContentBeforeSemicolon)
+	{
+		szBlanksSpace = GetBlankSpace1(szline,0)
+		InsBufline(hbuf,wline,"@szBlanksSpace@/**<@szContentAfterSemicolon@*/")
+		SetBufIns(hbuf,wline,strlen(szBlanksSpace) + 4)
+		return
+	}
+	InsBufline(hbuf,wline,"@szContentBeforeSemicolon@; /**<@szContentAfterSemicolon@*/")
+	SetBufIns(hbuf,wline,strlen(szContentBeforeSemicolon) + 6)
 }
