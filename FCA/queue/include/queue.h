@@ -1,7 +1,7 @@
 #include "fca_type.h"
 
-#ifndef __QUEUE__
-#define __QUEUE__
+#ifndef __QUEUE_H__
+#define __QUEUE_H__
 
 const FCA_ULONG g_quque_default_capasity = 4096;
 

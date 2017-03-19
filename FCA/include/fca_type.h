@@ -1,5 +1,5 @@
-#ifndef __STD_TYPE__
-#define __STD_TYPE__
+#ifndef __STD_TYPE_H__
+#define __STD_TYPE_H__
 
 #ifdef __LP64__
 #define FCAPTR_SIZE 64
