@@ -9,7 +9,7 @@ template <class Any>
 class queue
 {
 public:
-    queue(FCA_ULONG max_capacity);
+    queue(FCA_ULONG capacity = g_quque_default_capasity);
     ~queue();
     
     FCA_BOOL pop(Any *);

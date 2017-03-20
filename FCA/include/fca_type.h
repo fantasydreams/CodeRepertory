@@ -6,8 +6,6 @@
 #else
 #ifdef __ILP32__
 #define FCAPTR_SIZE 32
-#else
-#error "please specify LP64 or ILP32"
 #endif
 #endif
 

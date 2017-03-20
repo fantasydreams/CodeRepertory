@@ -1,0 +1,4 @@
+﻿main.obj : error LNK2019: 无法解析的外部符号 "public: static class testing::UnitTest * __cdecl testing::UnitTest::GetInstance(void)" (?GetInstance@UnitTest@testing@@SAPEAV12@XZ)，该符号在函数 "int __cdecl RUN_ALL_TESTS(void)" (?RUN_ALL_TESTS@@YAHXZ) 中被引用
+main.obj : error LNK2019: 无法解析的外部符号 "public: int __cdecl testing::UnitTest::Run(void)" (?Run@UnitTest@testing@@QEAAHXZ)，该符号在函数 "int __cdecl RUN_ALL_TESTS(void)" (?RUN_ALL_TESTS@@YAHXZ) 中被引用
+main.obj : error LNK2019: 无法解析的外部符号 "void __cdecl testing::InitGoogleTest(int *,wchar_t * *)" (?InitGoogleTest@testing@@YAXPEAHPEAPEA_W@Z)，该符号在函数 main 中被引用
+F:\git\CodeRepertory\LLT\vs_llt_proj\x64\Debug\vs_llt_proj.exe : fatal error LNK1120: 3 个无法解析的外部命令
